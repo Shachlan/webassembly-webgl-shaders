@@ -1,105 +1,112 @@
-import { Subject, zip } from "rxjs";
+import createFrameRenderer from "./frameRenderer";
 
-import { createVideoStreamFromElement } from "./createVideoStream";
-import {
-  clearContex,
-  createContext,
-  renderFrame,
-  setup
-} from "./videoRenderer";
-import { size as globalSize } from "./globals";
+createFrameRenderer(30).render(
+  () => {}
+  // console.log(`this is the rate ${performance.now()}`)
+);
 
-window.addEventListener("wasmLoaded", () => {
-  console.log("wasmLoaded");
+// import { Subject, zip } from "rxjs";
 
-  let previewCanvasContext;
-  let secondaryCanvasContext;
+// import { createVideoStreamFromElement } from "./createVideoStream";
+// import {
+//   clearContex,
+//   createContext,
+//   renderFrame,
+//   setup
+// } from "./videoRenderer";
+// import { size as globalSize } from "./globals";
 
-  const canvasContainer = document.getElementById("canvasContainer");
-  const canvasContainer1 = document.getElementById("canvasContainer1");
-  const fileInput = document.getElementById("fileInput");
-  const fileInput2 = document.getElementById("fileInput2");
-  /** @type {HTMLVideoElement} */
-  const firstVideoElement = document.getElementById("firstVideo");
-  /** @type {HTMLVideoElement} */
-  const secondVideoElement = document.getElementById("secondVideo");
-  const convert = document.getElementById("convert");
+// window.addEventListener("wasmLoaded", () => {
+//   console.log("wasmLoaded");
 
-  firstVideoElement.addEventListener("loadeddata", () => {
-    const canvas = document.createElement("canvas");
-    canvas.id = "previewCanvas";
-    canvas.height = firstVideoElement.clientHeight;
-    canvas.width = firstVideoElement.clientWidth;
+//   let previewCanvasContext;
+//   let secondaryCanvasContext;
 
-    secondVideoElement.style.maxWidth = `${firstVideoElement.clientWidth}px`;
-    secondVideoElement.style.maxHeight = `${firstVideoElement.clientHeight}px`;
-    previewCanvasContext = canvas.getContext("2d");
-    previewCanvasContext.drawImage(firstVideoElement, 0, 0);
-  });
+//   const canvasContainer = document.getElementById("canvasContainer");
+//   const canvasContainer1 = document.getElementById("canvasContainer1");
+//   const fileInput = document.getElementById("fileInput");
+//   const fileInput2 = document.getElementById("fileInput2");
+//   /** @type {HTMLVideoElement} */
+//   const firstVideoElement = document.getElementById("firstVideo");
+//   /** @type {HTMLVideoElement} */
+//   const secondVideoElement = document.getElementById("secondVideo");
+//   const convert = document.getElementById("convert");
 
-  secondVideoElement.addEventListener("loadeddata", () => {
-    const canvas = document.createElement("canvas");
-    canvas.id = "previewCanvas";
-    canvas.height = firstVideoElement.clientHeight;
-    canvas.width = firstVideoElement.clientWidth;
+//   firstVideoElement.addEventListener("loadeddata", () => {
+//     const canvas = document.createElement("canvas");
+//     canvas.id = "previewCanvas";
+//     canvas.height = firstVideoElement.clientHeight;
+//     canvas.width = firstVideoElement.clientWidth;
 
-    secondaryCanvasContext = canvas.getContext("2d");
-    secondaryCanvasContext.drawImage(secondVideoElement, 0, 0);
-  });
+//     secondVideoElement.style.maxWidth = `${firstVideoElement.clientWidth}px`;
+//     secondVideoElement.style.maxHeight = `${firstVideoElement.clientHeight}px`;
+//     previewCanvasContext = canvas.getContext("2d");
+//     previewCanvasContext.drawImage(firstVideoElement, 0, 0);
+//   });
 
-  function createCanvases() {
-    canvasContainer.childNodes.forEach(c => canvasContainer.removeChild(c));
-    const textureLoadCanvas = document.createElement("canvas");
-    textureLoadCanvas.id = "textureLoad";
-    textureLoadCanvas.width = globalSize.width;
-    textureLoadCanvas.height = globalSize.height;
-    canvasContainer.appendChild(textureLoadCanvas);
+//   secondVideoElement.addEventListener("loadeddata", () => {
+//     const canvas = document.createElement("canvas");
+//     canvas.id = "previewCanvas";
+//     canvas.height = firstVideoElement.clientHeight;
+//     canvas.width = firstVideoElement.clientWidth;
 
-    const edgeDetectCanvas = document.createElement("canvas");
-    edgeDetectCanvas.id = "edgeDetect";
-    edgeDetectCanvas.width = globalSize.width;
-    edgeDetectCanvas.height = globalSize.height;
-    canvasContainer.appendChild(edgeDetectCanvas);
+//     secondaryCanvasContext = canvas.getContext("2d");
+//     secondaryCanvasContext.drawImage(secondVideoElement, 0, 0);
+//   });
 
-    createContext(textureLoadCanvas, 0);
-    createContext(edgeDetectCanvas, 1);
-  }
+//   function createCanvases() {
+//     canvasContainer.childNodes.forEach(c => canvasContainer.removeChild(c));
+//     const textureLoadCanvas = document.createElement("canvas");
+//     textureLoadCanvas.id = "textureLoad";
+//     textureLoadCanvas.width = globalSize.width;
+//     textureLoadCanvas.height = globalSize.height;
+//     canvasContainer.appendChild(textureLoadCanvas);
 
-  function loadFirstVideo(src) {
-    clearContex();
-    firstVideoElement.src = src;
-    createCanvases();
-  }
+//     const edgeDetectCanvas = document.createElement("canvas");
+//     edgeDetectCanvas.id = "edgeDetect";
+//     edgeDetectCanvas.width = globalSize.width;
+//     edgeDetectCanvas.height = globalSize.height;
+//     canvasContainer.appendChild(edgeDetectCanvas);
 
-  function loadSecondVideo(src) {
-    secondVideoElement.src = src;
-  }
+//     createContext(textureLoadCanvas, 0);
+//     createContext(edgeDetectCanvas, 1);
+//   }
 
-  loadFirstVideo("./dog.mp4");
-  loadSecondVideo("./race.mp4");
+//   function loadFirstVideo(src) {
+//     clearContex();
+//     firstVideoElement.src = src;
+//     createCanvases();
+//   }
 
-  // File input
-  fileInput.addEventListener("change", event =>
-    loadFirstVideo(URL.createObjectURL(event.target.files[0]))
-  );
-  fileInput2.addEventListener("change", event =>
-    loadSecondVideo(URL.createObjectURL(event.target.files[0]))
-  );
+//   function loadSecondVideo(src) {
+//     secondVideoElement.src = src;
+//   }
 
-  convert.addEventListener("click", () => {
-    const firstVideoSubject = new Subject();
-    const secondVideoSubject = new Subject();
+//   loadFirstVideo("./dog.mp4");
+//   loadSecondVideo("./race.mp4");
 
-    setup();
-    createVideoStreamFromElement(firstVideoElement, imageData => {
-      firstVideoSubject.next(imageData);
-    });
-    createVideoStreamFromElement(secondVideoElement, imageData => {
-      secondVideoSubject.next(imageData);
-    });
+//   // File input
+//   fileInput.addEventListener("change", event =>
+//     loadFirstVideo(URL.createObjectURL(event.target.files[0]))
+//   );
+//   fileInput2.addEventListener("change", event =>
+//     loadSecondVideo(URL.createObjectURL(event.target.files[0]))
+//   );
 
-    zip(firstVideoSubject, secondVideoSubject).subscribe(images =>
-      renderFrame(images[0], images[1])
-    );
-  });
-});
+//   convert.addEventListener("click", () => {
+//     const firstVideoSubject = new Subject();
+//     const secondVideoSubject = new Subject();
+
+//     setup();
+//     createVideoStreamFromElement(firstVideoElement, imageData => {
+//       firstVideoSubject.next(imageData);
+//     });
+//     createVideoStreamFromElement(secondVideoElement, imageData => {
+//       secondVideoSubject.next(imageData);
+//     });
+
+//     zip(firstVideoSubject, secondVideoSubject).subscribe(images =>
+//       renderFrame(images[0], images[1])
+//     );
+//   });
+// });
