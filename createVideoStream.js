@@ -60,12 +60,7 @@ export default function createVideoStream(file, frameCallback) {
  * @param {HTMLVideoElement} videoElement
  * @param {function} frameCallback
  */
-export function createVideoStreamFromElement(videoElement, frameCallback) {
-  const canvas = document.createElement("canvas");
-  canvas.width = globalSize.width;
-  canvas.height = globalSize.height;
-  const ctx = canvas.getContext("webgl");
-
+export function createVideoStreamFromElement(videoElement, ctx, frameCallback) {
   requestAnimationFrame(() => frame(videoElement, ctx, frameCallback));
   if (videoElement.readyState === 4) {
     console.log("ready to play");

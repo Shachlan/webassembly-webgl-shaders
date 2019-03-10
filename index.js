@@ -56,14 +56,15 @@ window.addEventListener("wasmLoaded", () => {
     const firstVideoSubject = new Subject();
     const secondVideoSubject = new Subject();
     const frameSubject = new Subject();
+    const context = canvas.getContext("webgl");
 
     createFrameRenderer(30).render(() => frameSubject.next({}));
 
     setup();
-    createVideoStreamFromElement(firstVideoElement, imageData => {
+    createVideoStreamFromElement(firstVideoElement, context, imageData => {
       firstVideoSubject.next(imageData);
     });
-    createVideoStreamFromElement(secondVideoElement, imageData => {
+    createVideoStreamFromElement(secondVideoElement, context, imageData => {
       secondVideoSubject.next(imageData);
     });
 
