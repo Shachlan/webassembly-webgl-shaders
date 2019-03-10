@@ -81,20 +81,7 @@ std::string mix_images_fragment_source =
     "  gl_FragColor = color1 + color2;   \n"
     "}                                                   \n";
 
-
-std::string edge_detect_fragment_source =
-    "precision mediump float;                            \n"
-    "varying vec2 v_texCoord;                            \n"
-    "uniform sampler2D texture1;                        \n"
-    "void main()                                         \n"
-    "{          \n"
-
-    "}                                                   \n";
-
-
-
 GLuint CompileShader (GLenum type, std::string *source) {
-
     // Create shader object
     const GLchar* sourceString[1];
     GLint sourceStringLengths[1];
@@ -128,11 +115,19 @@ GLuint CompileShader (GLenum type, std::string *source) {
     return shader;
 }
 
+void Context::setupTexture(const GLchar * name, GLenum texture, GLuint texId, int samplerNum) {
+    GLint textureLoc = glGetUniformLocation(programObject, name);
+    glUniform1i(textureLoc, samplerNum);
+    glActiveTexture(texture);
+    glBindTexture(GL_TEXTURE_2D, texId);
+}
 
-Context::Context (int w, int h, char * id) {
+Context::Context (int w, int h, char * id, GLuint texture1, GLuint texture2) {
 
     width = w;
     height = h;
+    textureLoc1 = texture1;
+    textureLoc2 = texture2;
 
     // Context configurations
     EmscriptenWebGLContextAttributes attrs;
@@ -140,21 +135,15 @@ Context::Context (int w, int h, char * id) {
     attrs.depth = 1;
     attrs.stencil = 1;
     attrs.antialias = 1;
-    attrs.majorVersion = 2;
+    attrs.majorVersion = 1;
     attrs.minorVersion = 0;
 
     context = emscripten_webgl_create_context(id, &attrs);
     emscripten_webgl_make_context_current(context);
 
     // Compile shaders
-    if (std::string(id) == "textureLoad") {
-        fragmentShader = CompileShader(GL_FRAGMENT_SHADER, &mix_images_fragment_source);
-        vertexShader = CompileShader(GL_VERTEX_SHADER, &vertex_source);
-
-    } else if (std::string(id) == "edgeDetect") {
-        fragmentShader = CompileShader(GL_FRAGMENT_SHADER, &edge_detect_fragment_source);
-        vertexShader = CompileShader(GL_VERTEX_SHADER, &vertex_source);
-    }
+    fragmentShader = CompileShader(GL_FRAGMENT_SHADER, &mix_images_fragment_source);
+    vertexShader = CompileShader(GL_VERTEX_SHADER, &vertex_source);
 
     // Build program
     programObject = glCreateProgram();
@@ -172,7 +161,7 @@ Context::~Context (void) {
     emscripten_webgl_destroy_context(context);
 }
 
-void Context::setup() {
+void Context::run () {
 // Make the context current and use the program
     emscripten_webgl_make_context_current(context);
     glUseProgram( programObject );
@@ -183,35 +172,9 @@ void Context::setup() {
     float heightUniform = glGetUniformLocation(programObject, "height");
     glUniform1f(widthUniform, (float) width);
     glUniform1f(heightUniform, (float) height);
-}
+    setupTexture("texture1", GL_TEXTURE0, textureLoc1, 0);
+    setupTexture("texture2", GL_TEXTURE1, textureLoc2, 1);
 
-void Context::setupTexture(const GLchar * name, GLenum texture, uint8_t* buffer, int samplerNum) {
-    GLuint texId;
-    GLint textureLoc = glGetUniformLocation(programObject, name);
-
-    // Generate a texture object
-    glGenTextures(1, &texId);
-    glUniform1i(textureLoc, samplerNum);
-
-    // Bind it
-    glActiveTexture(texture);
-    glBindTexture(GL_TEXTURE_2D, texId);
-
-    // Load the texture from the image buffer
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-}
-
-void Context::setupMainTexture (uint8_t* buffer) {
-    setupTexture("texture1", GL_TEXTURE0, buffer, 0);
-}
-
-void Context::setupSecondaryTexture (uint8_t* buffer) {
-    setupTexture("texture2", GL_TEXTURE1, buffer, 1);
-}
-
-void Context::run () {
     GLuint vertexObject;
     GLuint indexObject;
 

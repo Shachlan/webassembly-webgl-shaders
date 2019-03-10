@@ -33,26 +33,9 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
-    void createContext (int width, int height, char * id, int index) {
-        contexts[index] = new Context(width, height, id);
+    void createContext (int width, int height, char * id, int index, GLuint texture1, GLuint texture2) {
+        contexts[index] = new Context(width, height, id, texture1, texture2);
         free(id);
-    }
-
-    EMSCRIPTEN_KEEPALIVE
-    void blendTexturesSetup () {
-        contexts[0]->setup();
-    }
-
-    EMSCRIPTEN_KEEPALIVE
-    void blendTexturesLoadMain(uint8_t *buf, int bufSize) {
-        contexts[0]->setupMainTexture(buf);
-        free(buf);
-    }
-
-    EMSCRIPTEN_KEEPALIVE
-    void blendTexturesLoadSecondary(uint8_t *buf, int bufSize) {
-        contexts[0]->setupSecondaryTexture(buf);
-        free(buf);
     }
 
     EMSCRIPTEN_KEEPALIVE
