@@ -17,12 +17,10 @@ window.addEventListener("wasmLoaded", () => {
   let secondaryCanvasContext;
 
   const canvasContainer = document.getElementById("canvasContainer");
-  const fileInput = document.getElementById("fileInput");
-  const fileInput2 = document.getElementById("fileInput2");
   /** @type {HTMLVideoElement} */
-  const firstVideoElement = document.getElementById("firstVideo");
+  const firstVideoElement = document.createElement("video");
   /** @type {HTMLVideoElement} */
-  const secondVideoElement = document.getElementById("secondVideo");
+  const secondVideoElement = document.createElement("video");
   const convert = document.getElementById("convert");
 
   firstVideoElement.addEventListener("loadeddata", () => {
@@ -77,14 +75,6 @@ window.addEventListener("wasmLoaded", () => {
 
   loadFirstVideo("./dog.mp4");
   loadSecondVideo("./race.mp4");
-
-  // File input
-  fileInput.addEventListener("change", event =>
-    loadFirstVideo(URL.createObjectURL(event.target.files[0]))
-  );
-  fileInput2.addEventListener("change", event =>
-    loadSecondVideo(URL.createObjectURL(event.target.files[0]))
-  );
 
   convert.addEventListener("click", () => {
     const firstVideoSubject = new Subject();
