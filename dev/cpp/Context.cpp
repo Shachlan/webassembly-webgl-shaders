@@ -155,26 +155,14 @@ Context::Context (int w, int h, char * id, GLuint texture1, GLuint texture2) {
 
     glLinkProgram(programObject);
     glValidateProgram(programObject);
-}
-
-Context::~Context (void) {
-    emscripten_webgl_destroy_context(context);
-}
-
-void Context::run () {
-// Make the context current and use the program
-    emscripten_webgl_make_context_current(context);
     glUseProgram( programObject );
 
-    // For "ERROR :GL_INVALID_OPERATION : glUniform1i: wrong uniform function for type"
-    // https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glUniform.xhtml
     float widthUniform = glGetUniformLocation(programObject, "width");
     float heightUniform = glGetUniformLocation(programObject, "height");
     glUniform1f(widthUniform, (float) width);
     glUniform1f(heightUniform, (float) height);
     setupTexture("texture1", GL_TEXTURE0, textureLoc1, 0);
-    setupTexture("texture2", GL_TEXTURE1, textureLoc2, 1);
-
+    setupTexture("texture2", GL_TEXTURE1, textureLoc2, 1);    
     GLuint vertexObject;
     GLuint indexObject;
 
@@ -205,6 +193,15 @@ void Context::run () {
 
     glEnableVertexAttribArray(positionLoc);
     glEnableVertexAttribArray(texCoordLoc);
+}
+
+Context::~Context (void) {
+    emscripten_webgl_destroy_context(context);
+}
+
+void Context::run () {
+// Make the context current and use the program
+    emscripten_webgl_make_context_current(context);
 
     // Draw
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
