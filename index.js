@@ -1,112 +1,108 @@
 import createFrameRenderer from "./frameRenderer";
+import { Subject, zip } from "rxjs";
 
-createFrameRenderer(30).render(
-  () => {}
-  // console.log(`this is the rate ${performance.now()}`)
-);
+import { createVideoStreamFromElement } from "./createVideoStream";
+import {
+  clearContex,
+  createContext,
+  renderFrame,
+  setup
+} from "./videoRenderer";
+import { size as globalSize } from "./globals";
 
-// import { Subject, zip } from "rxjs";
+window.addEventListener("wasmLoaded", () => {
+  console.log("wasmLoaded");
 
-// import { createVideoStreamFromElement } from "./createVideoStream";
-// import {
-//   clearContex,
-//   createContext,
-//   renderFrame,
-//   setup
-// } from "./videoRenderer";
-// import { size as globalSize } from "./globals";
+  let previewCanvasContext;
+  let secondaryCanvasContext;
 
-// window.addEventListener("wasmLoaded", () => {
-//   console.log("wasmLoaded");
+  const canvasContainer = document.getElementById("canvasContainer");
+  const fileInput = document.getElementById("fileInput");
+  const fileInput2 = document.getElementById("fileInput2");
+  /** @type {HTMLVideoElement} */
+  const firstVideoElement = document.getElementById("firstVideo");
+  /** @type {HTMLVideoElement} */
+  const secondVideoElement = document.getElementById("secondVideo");
+  const convert = document.getElementById("convert");
 
-//   let previewCanvasContext;
-//   let secondaryCanvasContext;
+  firstVideoElement.addEventListener("loadeddata", () => {
+    const canvas = document.createElement("canvas");
+    canvas.id = "previewCanvas";
+    canvas.height = firstVideoElement.clientHeight;
+    canvas.width = firstVideoElement.clientWidth;
 
-//   const canvasContainer = document.getElementById("canvasContainer");
-//   const canvasContainer1 = document.getElementById("canvasContainer1");
-//   const fileInput = document.getElementById("fileInput");
-//   const fileInput2 = document.getElementById("fileInput2");
-//   /** @type {HTMLVideoElement} */
-//   const firstVideoElement = document.getElementById("firstVideo");
-//   /** @type {HTMLVideoElement} */
-//   const secondVideoElement = document.getElementById("secondVideo");
-//   const convert = document.getElementById("convert");
+    secondVideoElement.style.maxWidth = `${firstVideoElement.clientWidth}px`;
+    secondVideoElement.style.maxHeight = `${firstVideoElement.clientHeight}px`;
+    previewCanvasContext = canvas.getContext("2d");
+    previewCanvasContext.drawImage(firstVideoElement, 0, 0);
+  });
 
-//   firstVideoElement.addEventListener("loadeddata", () => {
-//     const canvas = document.createElement("canvas");
-//     canvas.id = "previewCanvas";
-//     canvas.height = firstVideoElement.clientHeight;
-//     canvas.width = firstVideoElement.clientWidth;
+  secondVideoElement.addEventListener("loadeddata", () => {
+    const canvas = document.createElement("canvas");
+    canvas.id = "previewCanvas";
+    canvas.height = firstVideoElement.clientHeight;
+    canvas.width = firstVideoElement.clientWidth;
 
-//     secondVideoElement.style.maxWidth = `${firstVideoElement.clientWidth}px`;
-//     secondVideoElement.style.maxHeight = `${firstVideoElement.clientHeight}px`;
-//     previewCanvasContext = canvas.getContext("2d");
-//     previewCanvasContext.drawImage(firstVideoElement, 0, 0);
-//   });
+    secondaryCanvasContext = canvas.getContext("2d");
+    secondaryCanvasContext.drawImage(secondVideoElement, 0, 0);
+  });
 
-//   secondVideoElement.addEventListener("loadeddata", () => {
-//     const canvas = document.createElement("canvas");
-//     canvas.id = "previewCanvas";
-//     canvas.height = firstVideoElement.clientHeight;
-//     canvas.width = firstVideoElement.clientWidth;
+  function createCanvases() {
+    canvasContainer.childNodes.forEach(c => canvasContainer.removeChild(c));
+    const textureLoadCanvas = document.createElement("canvas");
+    textureLoadCanvas.id = "textureLoad";
+    textureLoadCanvas.width = globalSize.width;
+    textureLoadCanvas.height = globalSize.height;
+    canvasContainer.appendChild(textureLoadCanvas);
 
-//     secondaryCanvasContext = canvas.getContext("2d");
-//     secondaryCanvasContext.drawImage(secondVideoElement, 0, 0);
-//   });
+    const edgeDetectCanvas = document.createElement("canvas");
+    edgeDetectCanvas.id = "edgeDetect";
+    edgeDetectCanvas.width = globalSize.width;
+    edgeDetectCanvas.height = globalSize.height;
+    canvasContainer.appendChild(edgeDetectCanvas);
 
-//   function createCanvases() {
-//     canvasContainer.childNodes.forEach(c => canvasContainer.removeChild(c));
-//     const textureLoadCanvas = document.createElement("canvas");
-//     textureLoadCanvas.id = "textureLoad";
-//     textureLoadCanvas.width = globalSize.width;
-//     textureLoadCanvas.height = globalSize.height;
-//     canvasContainer.appendChild(textureLoadCanvas);
+    createContext(textureLoadCanvas, 0);
+    createContext(edgeDetectCanvas, 1);
+  }
 
-//     const edgeDetectCanvas = document.createElement("canvas");
-//     edgeDetectCanvas.id = "edgeDetect";
-//     edgeDetectCanvas.width = globalSize.width;
-//     edgeDetectCanvas.height = globalSize.height;
-//     canvasContainer.appendChild(edgeDetectCanvas);
+  function loadFirstVideo(src) {
+    clearContex();
+    firstVideoElement.src = src;
+    createCanvases();
+  }
 
-//     createContext(textureLoadCanvas, 0);
-//     createContext(edgeDetectCanvas, 1);
-//   }
+  function loadSecondVideo(src) {
+    secondVideoElement.src = src;
+  }
 
-//   function loadFirstVideo(src) {
-//     clearContex();
-//     firstVideoElement.src = src;
-//     createCanvases();
-//   }
+  loadFirstVideo("./dog.mp4");
+  loadSecondVideo("./race.mp4");
 
-//   function loadSecondVideo(src) {
-//     secondVideoElement.src = src;
-//   }
+  // File input
+  fileInput.addEventListener("change", event =>
+    loadFirstVideo(URL.createObjectURL(event.target.files[0]))
+  );
+  fileInput2.addEventListener("change", event =>
+    loadSecondVideo(URL.createObjectURL(event.target.files[0]))
+  );
 
-//   loadFirstVideo("./dog.mp4");
-//   loadSecondVideo("./race.mp4");
+  convert.addEventListener("click", () => {
+    const firstVideoSubject = new Subject();
+    const secondVideoSubject = new Subject();
+    const frameSubject = new Subject();
 
-//   // File input
-//   fileInput.addEventListener("change", event =>
-//     loadFirstVideo(URL.createObjectURL(event.target.files[0]))
-//   );
-//   fileInput2.addEventListener("change", event =>
-//     loadSecondVideo(URL.createObjectURL(event.target.files[0]))
-//   );
+    createFrameRenderer(30).render(() => frameSubject.next({}));
 
-//   convert.addEventListener("click", () => {
-//     const firstVideoSubject = new Subject();
-//     const secondVideoSubject = new Subject();
+    setup();
+    createVideoStreamFromElement(firstVideoElement, imageData => {
+      firstVideoSubject.next(imageData);
+    });
+    createVideoStreamFromElement(secondVideoElement, imageData => {
+      secondVideoSubject.next(imageData);
+    });
 
-//     setup();
-//     createVideoStreamFromElement(firstVideoElement, imageData => {
-//       firstVideoSubject.next(imageData);
-//     });
-//     createVideoStreamFromElement(secondVideoElement, imageData => {
-//       secondVideoSubject.next(imageData);
-//     });
-
-//     zip(firstVideoSubject, secondVideoSubject).subscribe(images =>
-//       renderFrame(images[0], images[1])
-//     );
-//   });
-// });
+    zip(firstVideoSubject, secondVideoSubject, frameSubject).subscribe(images =>
+      renderFrame(images[0], images[1])
+    );
+  });
+});
