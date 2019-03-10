@@ -24,9 +24,6 @@ export function setup() {
   ccallArrays("blendTexturesSetup", null, ["array"], [], {
     heapIn: "HEAPU8"
   });
-  ccallArrays("detectingEdgesSetup", null, ["array"], [], {
-    heapIn: "HEAPU8"
-  });
 }
 
 /**
