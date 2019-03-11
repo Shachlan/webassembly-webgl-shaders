@@ -3,7 +3,7 @@
  * @param {number} fps
  */
 export default function createFrameRenderer(fps) {
-  let stop = false;
+  let wasStopped = false;
   let frameCount = 0;
   const fpsInterval = 1000 / fps;
   let now, elapsed;
@@ -26,7 +26,7 @@ export default function createFrameRenderer(fps) {
   }
 
   function renderFrame() {
-    if (!stop) {
+    if (!wasStopped) {
       requestAnimationFrame(renderFrame);
     }
     now = performance.now();
@@ -46,8 +46,13 @@ export default function createFrameRenderer(fps) {
       //console.log(`after render ${performance.now()}`);
     }
   }
+  function stop() {
+    console.log("stopped");
+    wasStopped = true;
+  }
 
   return {
-    render
+    render,
+    stop
   };
 }
