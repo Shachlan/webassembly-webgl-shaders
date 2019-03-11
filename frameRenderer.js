@@ -31,7 +31,8 @@ export default function createFrameRenderer(fps) {
     }
     now = performance.now();
     elapsed = now - then;
-    // console.log(`elapsed`, elapsed, now, then, fpsInterval);
+
+    //console.log(`elapsed`, elapsed, now, then, fpsInterval);
     if (elapsed > fpsInterval) {
       count += 1;
       if ((now - startTime) / 1000 > seconds) {
@@ -40,7 +41,9 @@ export default function createFrameRenderer(fps) {
         count = 0;
       }
       then = now - (elapsed % fpsInterval);
+      //console.log(`before render ${performance.now()}`);
       drawCallback();
+      //console.log(`after render ${performance.now()}`);
     }
   }
 

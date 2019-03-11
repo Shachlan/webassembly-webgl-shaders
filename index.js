@@ -46,13 +46,12 @@ window.addEventListener("wasmLoaded", () => {
     const textureId2 = RegisterNativeTextureId(texture2);
     createCanvas(textureId1, textureId2);
 
-    createFrameRenderer(30).render(() => {
+    createFrameRenderer(60).render(() => {
       updateTexture(context, texture1, firstVideoElement);
       updateTexture(context, texture2, secondVideoElement);
       renderFrame();
     });
 
-    startVideoStream(firstVideoElement);
-    startVideoStream(secondVideoElement);
+    startVideoStream([firstVideoElement, secondVideoElement]);
   });
 });

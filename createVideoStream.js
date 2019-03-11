@@ -75,19 +75,21 @@ export function updateTexture(gl, texture, video) {
 
 /**
  *
- * @param {HTMLVideoElement} videoElement
+ * @param {HTMLVideoElement[]} videoElements
  * @param {function} frameCallback
  */
-export function startVideoStream(videoElement) {
-  if (videoElement.readyState === 4) {
-    console.log("ready to play");
-
-    videoElement.play();
-  } else {
-    videoElement.onloadeddata = () => {
-      console.log("loaded");
-
-      videoElement.play();
-    };
-  }
+export function startVideoStream(videoElements) {
+  const playPromises = videoElements.map(v => {
+    return new Promise((resolve, reject) => {
+      if (v.readyState === 4) {
+        console.log("ready to play");
+        resolve();
+      } else {
+        videoElement.onloadeddata = () => {
+          resolve();
+        };
+      }
+    });
+  });
+  Promise.all(playPromises).then(() => videoElements.forEach(v => v.play()));
 }
