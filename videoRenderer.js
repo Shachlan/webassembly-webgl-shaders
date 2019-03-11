@@ -27,7 +27,5 @@ export function clearContex() {
  * @param {ImageData} secondImageData
  */
 export function renderFrame() {
-  ccallArrays("blendTexturesRun", null, null, null, {
-    heapIn: "HEAPU8"
-  });
+  Module.ccall("blendTexturesRun");
 }

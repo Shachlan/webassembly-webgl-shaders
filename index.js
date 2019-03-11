@@ -38,7 +38,7 @@ window.addEventListener("wasmLoaded", () => {
   loadSecondVideo("./race.mp4");
 
   convert.addEventListener("click", () => {
-    const context = canvas.getContext("webgl");
+    const context = canvas.getContext("webgl2");
 
     const texture1 = initTexture(context);
     const texture2 = initTexture(context);
