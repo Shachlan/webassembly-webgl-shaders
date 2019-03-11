@@ -1,7 +1,12 @@
 import createFrameRenderer from "./frameRenderer";
 import { Subject, zip } from "rxjs";
 
-import { createVideoStreamFromElement } from "./createVideoStream";
+import {
+  startVideoStream,
+  RegisterNativeTextureId,
+  initTexture,
+  updateTexture
+} from "./createVideoStream";
 import { clearContex, createContext, renderFrame } from "./videoRenderer";
 
 window.addEventListener("wasmLoaded", () => {
@@ -33,31 +38,21 @@ window.addEventListener("wasmLoaded", () => {
   loadSecondVideo("./race.mp4");
 
   convert.addEventListener("click", () => {
-    const firstVideoSubject = new Subject();
-    const secondVideoSubject = new Subject();
-    const frameSubject = new Subject();
     const context = canvas.getContext("webgl");
 
-    createFrameRenderer(30).render(() => frameSubject.next({}));
-
-    const textureId1 = createVideoStreamFromElement(
-      firstVideoElement,
-      context,
-      () => {
-        firstVideoSubject.next({});
-      }
-    );
-    const textureId2 = createVideoStreamFromElement(
-      secondVideoElement,
-      context,
-      () => {
-        secondVideoSubject.next({});
-      }
-    );
-
-    zip(firstVideoSubject, secondVideoSubject, frameSubject).subscribe(images =>
-      renderFrame()
-    );
+    const texture1 = initTexture(context);
+    const texture2 = initTexture(context);
+    const textureId1 = RegisterNativeTextureId(texture1);
+    const textureId2 = RegisterNativeTextureId(texture2);
     createCanvas(textureId1, textureId2);
+
+    createFrameRenderer(30).render(() => {
+      updateTexture(context, texture1, firstVideoElement);
+      updateTexture(context, texture2, secondVideoElement);
+      renderFrame();
+    });
+
+    startVideoStream(firstVideoElement);
+    startVideoStream(secondVideoElement);
   });
 });
