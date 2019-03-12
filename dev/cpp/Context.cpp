@@ -135,7 +135,7 @@ Context::Context (int w, int h, char * id, GLuint texture1, GLuint texture2) {
     attrs.depth = 1;
     attrs.stencil = 1;
     attrs.antialias = 1;
-    attrs.majorVersion = 2;
+    attrs.majorVersion = 1;
     attrs.minorVersion = 0;
 
     context = emscripten_webgl_create_context(id, &attrs);
