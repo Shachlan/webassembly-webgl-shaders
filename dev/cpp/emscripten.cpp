@@ -33,8 +33,8 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
-    void createContext (int width, int height, char * id, int index, GLuint texture1, GLuint texture2) {
-        contexts[index] = new Context(width, height, id, texture1, texture2);
+    void createContext (int width, int height, char * id, int index, GLuint texture1) {
+        contexts[index] = new Context(width, height, id, texture1);
         free(id);
     }
 

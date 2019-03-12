@@ -2,7 +2,7 @@
 
 class Context {
 public:
-    Context (int width, int height, char * id, GLuint texture1, GLuint texture2);
+    Context (int width, int height, char * id, GLuint texture1);
 
     ~Context (void);
 
@@ -18,7 +18,6 @@ void setupTexture(const GLchar * name, GLenum texture, GLuint texId, int sampler
     GLuint vertexShader;
     GLuint fragmentShader;
     GLuint textureLoc1;
-    GLuint textureLoc2;
 
     EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context;
 
