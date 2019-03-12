@@ -15,6 +15,7 @@ export default function createFrameRenderer(fps) {
     throw new Error("no draw callback provided!");
     return undefined;
   };
+  let fpsCount = [];
 
   /**
    *
@@ -39,7 +40,7 @@ export default function createFrameRenderer(fps) {
     count += 1;
     if ((now - startTime) / 1000 > seconds) {
       seconds += 1;
-      console.log(`frames in latest second is ${count}`);
+      fpsCount.push(count);
       count = 0;
     }
     then = now - (elapsed % fpsInterval);
@@ -47,7 +48,7 @@ export default function createFrameRenderer(fps) {
     requestAnimationFrame(renderFrame);
   }
   function stop() {
-    console.log("stopped");
+    console.log("stopped. FPS was: ", fpsCount);
     wasStopped = true;
   }
 
