@@ -12,44 +12,35 @@ std::string vertex_source =
     "}                            \n";
 
 std::string mix_images_fragment_source =
-    "precision mediump float;                            \n"
-    "varying vec2 v_texCoord;                            \n"
-    "uniform sampler2D texture1;                        \n"
-    "uniform float width;  \n"
-    "uniform float height;  \n"
-    "void main()                                         \n"
-    "{        \n"
-    "  vec4 pixel = texture2D(texture1, v_texCoord);              \n"
-    "  vec4 n[9];\n"
-
-    "  float w = 1.0 / width;\n"
-    "  float h = 1.0 / height;\n"
-
-    "  n[0] = texture2D(texture1, v_texCoord + vec2(0.0, 0.0) );\n"
-    "  n[1] = texture2D(texture1, v_texCoord + vec2(w, 0.0) );\n"
-    "  n[2] = texture2D(texture1, v_texCoord + vec2(2.0*w, 0.0) );\n"
-    "  n[3] = texture2D(texture1, v_texCoord + vec2(0.0*w, h) );\n"
-    "  n[4] = texture2D(texture1, v_texCoord + vec2(w, h) );\n"
-    "  n[5] = texture2D(texture1, v_texCoord + vec2(2.0*w, h) );\n"
-    "  n[6] = texture2D(texture1, v_texCoord + vec2(0.0, 2.0*h) );\n"
-    "  n[7] = texture2D(texture1, v_texCoord + vec2(w, 2.0*h) );\n"
-    "  n[8] = texture2D(texture1, v_texCoord + vec2(2.0*w, 2.0*h) );\n"
-
-    "  vec4 sobel_x = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);\n"
-    "  vec4 sobel_y = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);\n"
-
-    "  float avg_x = (sobel_x.r + sobel_x.g + sobel_x.b) / 3.0;\n"
-    "  float avg_y = (sobel_y.r + sobel_y.g + sobel_y.b) / 3.0;\n"
-
-    "  sobel_x.r = avg_x;\n"
-    "  sobel_x.g = avg_x;\n"
-    "  sobel_x.b = avg_x;\n"
-    "  sobel_y.r = avg_y;\n"
-    "  sobel_y.g = avg_y;\n"
-    "  sobel_y.b = avg_y;\n"
-
-    "  vec3 sobel = vec3(sqrt((sobel_x.rgb * sobel_x.rgb) + (sobel_y.rgb * sobel_y.rgb)));\n"
-    "  gl_FragColor = vec4( sobel, 1.0 );   \n"  
+    "precision mediump float;\n"    
+    "varying vec2 v_texCoord;\n"    
+    "uniform sampler2D texture1;\n"    
+    "\n"
+    "uniform float shadows;\n"
+    "uniform float highlights;\n"
+    "\n"
+    "const vec3 luminanceWeighting = vec3(0.3, 0.3, 0.3);\n"
+    "\n"
+    "void main()     \n"
+    "{  \n"
+      "vec4 source = texture2D(texture1, v_texCoord);\n"
+      "float luminance = dot(source.rgb, luminanceWeighting);\n"
+    "\n"
+      "float shadow = clamp((pow(luminance, 1.0/shadows) + (-0.76)*pow(luminance, 2.0/shadows)) - luminance, 0.0, 1.0);\n"
+      "float highlight = clamp((1.0 - (pow(1.0-luminance, 1.0/(2.0-highlights)) + (-0.8)*pow(1.0-luminance, 2.0/(2.0-highlights)))) - luminance, -1.0, 0.0);\n"
+      "vec3 result = vec3(0.0, 0.0, 0.0) + ((luminance + shadow + highlight) - 0.0) * ((source.rgb - vec3(0.0, 0.0, 0.0))/(luminance - 0.0));\n"
+"\n"
+      "float contrastedLuminance = ((luminance - 0.5) * 1.5) + 0.5;\n"
+      "float whiteInterp = contrastedLuminance*contrastedLuminance*contrastedLuminance;\n"
+      "float whiteTarget = clamp(highlights, 1.0, 2.0) - 1.0;\n"
+      "result = mix(result, vec3(1.0), whiteInterp*whiteTarget);\n"
+"\n"
+      "float invContrastedLuminance = 1.0 - contrastedLuminance;\n"
+      "float blackInterp = invContrastedLuminance*invContrastedLuminance*invContrastedLuminance;\n"
+      "float blackTarget = 1.0 - clamp(shadows, 0.0, 1.0);\n"
+      "result = mix(result, vec3(0.0), blackInterp*blackTarget);\n"
+"\n"
+      "gl_FragColor = vec4(result, source.a);\n"
     "}                                                   \n";
 
 GLuint CompileShader (GLenum type, std::string *source) {
@@ -68,7 +59,6 @@ GLuint CompileShader (GLenum type, std::string *source) {
     // Assign and compile the source to the shader object
     glShaderSource(shader, 1, sourceString, sourceStringLengths);
     glCompileShader(shader);
-
     // Check if there were errors
     int infoLen = 0;
     glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &infoLen );
@@ -126,10 +116,10 @@ Context::Context (int w, int h, char * id, GLuint texture1) {
     glValidateProgram(programObject);
     glUseProgram( programObject );
 
-    float widthUniform = glGetUniformLocation(programObject, "width");
-    float heightUniform = glGetUniformLocation(programObject, "height");
-    glUniform1f(widthUniform, (float) width);
-    glUniform1f(heightUniform, (float) height);
+    float widthUniform = glGetUniformLocation(programObject, "shadows");
+    float heightUniform = glGetUniformLocation(programObject, "highlights");
+    glUniform1f(widthUniform, 0.5);
+    glUniform1f(heightUniform, 1.5);
     setupTexture("texture1", GL_TEXTURE0, textureLoc1, 0); 
     GLuint vertexObject;
     GLuint indexObject;
