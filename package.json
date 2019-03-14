@@ -38,6 +38,7 @@
   "dependencies": {
     "grunt-contrib-uglify-es": "git://github.com/gruntjs/grunt-contrib-uglify.git#harmony",
     "local-web-server": "^2.6.1",
-    "rxjs": "^6.4.0"
+    "rxjs": "^6.4.0",
+    "webm-wasm": "^0.4.1"
   }
 }
