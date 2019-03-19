@@ -17,8 +17,8 @@ window.addEventListener("wasmLoaded", () => {
   /** @type {HTMLVideoElement} */
   const secondVideoElement = document.createElement("video");
   const canvas = document.getElementById("renderTarget");
-  canvas.width = 1920;
-  canvas.height = 1080;
+  canvas.width = 640;
+  canvas.height = 480;
   const convert = document.getElementById("convert");
 
   function createCanvas(textureId1, textureId2) {
