@@ -19,7 +19,7 @@ function createFrameRenderer(fps) {
   let now, elapsed;
   let then = performance.now();
   let startTime = then;
-  let count,
+  let count = 0,
     seconds = 0;
   let drawCallback = () => {
     throw new Error("no draw callback provided!");
