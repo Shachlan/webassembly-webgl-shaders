@@ -143,6 +143,7 @@ Context::Context (int w, int h, char * id, GLuint texture1) {
 
     // Set the viewport
     glViewport(0, 0, width, height);
+    printf("width: %d, height: %d\n", width, height);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Load and enable the vertex position and texture coordinates
