@@ -116,10 +116,10 @@ Context::Context (int w, int h, char * id, GLuint texture1) {
     glValidateProgram(programObject);
     glUseProgram( programObject );
 
-    float widthUniform = glGetUniformLocation(programObject, "shadows");
-    float heightUniform = glGetUniformLocation(programObject, "highlights");
-    glUniform1f(widthUniform, 0.5);
-    glUniform1f(heightUniform, 1.5);
+    float shadowsUniform = glGetUniformLocation(programObject, "shadows");
+    float highlightsUniform = glGetUniformLocation(programObject, "highlights");
+    glUniform1f(shadowsUniform, 2.00);
+    glUniform1f(highlightsUniform, 0.1);
     setupTexture("texture1", GL_TEXTURE0, textureLoc1, 0); 
     GLuint vertexObject;
     GLuint indexObject;
