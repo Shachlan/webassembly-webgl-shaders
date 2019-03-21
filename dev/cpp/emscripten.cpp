@@ -7,7 +7,7 @@ extern "C" {
 }
 #include "Context.cpp"
 
-Context* contexts[2];
+Context* context;
 
 int main(int argc, char const *argv[]) {
     printf("[WASM] Loaded\n");
@@ -25,21 +25,14 @@ int main(int argc, char const *argv[]) {
 
 
 extern "C" {
-
-    EMSCRIPTEN_KEEPALIVE
-    void clearContexts (void) {
-        if (contexts[0]) delete contexts[0];
-        if (contexts[1]) delete contexts[1];
-    }
-
     EMSCRIPTEN_KEEPALIVE
     void createContext (int width, int height, char * id, int index, GLuint texture1) {
-        contexts[index] = new Context(width, height, id, texture1);
+        context = new Context(width, height, id, texture1);
         free(id);
     }
 
     EMSCRIPTEN_KEEPALIVE
     void blendTexturesRun () {
-        contexts[0]->run();
+        context->run();
     }
 }
