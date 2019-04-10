@@ -4,7 +4,7 @@
 #include <string>
 extern "C" {
 #include "html5.h"
-#include "Context.c"
+#include "openGLShading.cpp"
 }
 
 int main(int argc, char const *argv[])
@@ -30,16 +30,18 @@ void clearContexts(void)
 EMSCRIPTEN_KEEPALIVE
 void createContext(int width, int height, float blend_ratio, char *id)
 {
+    printf("creating %s context\n", id);
     setupOpenGL(width, height, blend_ratio, id);
+    free(id);
 }
 
-void invertFrameRun(GLuint texture1)
+void invertFrameRun(uint32_t texture1)
 {
     invertFrame(texture1);
 }
 
 EMSCRIPTEN_KEEPALIVE
-void blendTexturesRun(GLuint texture1, GLuint texture2)
+void blendTexturesRun(uint32_t texture1, uint32_t texture2)
 {
     blendFrames(texture1, texture2);
 }

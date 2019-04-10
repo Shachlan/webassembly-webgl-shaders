@@ -1,6 +1,6 @@
-#include "Context.h"
+#include "openGLShading.h"
 
-#include <string.h>
+#include <string>
 
 #if FRONTEND == 1
 #include <GLES2/gl2.h>
@@ -20,31 +20,33 @@
 
 #endif
 
-std::string vertex_shader_text = "attribute vec2 position;\n"
-                                 "attribute vec2 texCoord;\n"
-                                 "varying vec2 vTexCoord;\n"
-                                 "void main(void) {\n"
-                                 "    gl_Position = vec4(position, 0, 1);\n"
-                                 "    vTexCoord = texCoord;\n"
-                                 "}\n";
+static std::string vertex_shader_text = "attribute vec2 position;\n"
+                                        "attribute vec2 texCoord;\n"
+                                        "varying vec2 vTexCoord;\n"
+                                        "void main(void) {\n"
+                                        "    gl_Position = vec4(position, 0, 1);\n"
+                                        "    vTexCoord = texCoord;\n"
+                                        "}\n";
 
-std::string invert_shader_text = "uniform sampler2D tex;\n"
-                                 "varying vec2 vTexCoord;\n"
-                                 "void main() {\n"
-                                 "    const vec4 kInvert = vec4(1, 1, 1, 0);\n"
-                                 "    gl_FragColor = kInvert - texture2D(tex, vTexCoord);\n"
-                                 "}\n";
+static std::string invert_shader_text = "precision mediump float;\n"
+                                        "uniform sampler2D tex;\n"
+                                        "varying vec2 vTexCoord;\n"
+                                        "void main() {\n"
+                                        "    const vec4 kInvert = vec4(1, 1, 1, 0);\n"
+                                        "    gl_FragColor = kInvert - texture2D(tex, vTexCoord);\n"
+                                        "}\n";
 
-std::string blend_shader_text = "uniform sampler2D tex1;\n"
-                                "uniform sampler2D tex2;\n"
-                                "uniform float blendFactor;\n"
-                                "varying vec2 vTexCoord;\n"
-                                "\n"
-                                "void main() {\n"
-                                "    vec4 color1 = texture2D(tex1, vTexCoord);\n"
-                                "    vec4 color2 = texture2D(tex2, vTexCoord);\n"
-                                "    gl_FragColor = (color1 * blendFactor) + (color2 * (1.0 - blendFactor));\n"
-                                "}\n";
+static std::string blend_shader_text = "precision mediump float;\n"
+                                       "uniform sampler2D tex1;\n"
+                                       "uniform sampler2D tex2;\n"
+                                       "uniform float blendFactor;\n"
+                                       "varying vec2 vTexCoord;\n"
+                                       "\n"
+                                       "void main() {\n"
+                                       "    vec4 color1 = texture2D(tex1, vTexCoord);\n"
+                                       "    vec4 color2 = texture2D(tex2, vTexCoord);\n"
+                                       "    gl_FragColor = (color1 * blendFactor) + (color2 * (1.0 - blendFactor));\n"
+                                       "}\n";
 
 typedef struct
 {
@@ -55,7 +57,9 @@ typedef struct
 
 ProgramInfo invert_program;
 ProgramInfo blend_program;
+#if FRONTEND == 0
 GLFWwindow *window;
+#endif
 
 static const float position[12] = {
     -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f};
@@ -95,7 +99,7 @@ static GLuint build_shader(const GLchar *shader_source, GLenum type)
     }
     GLint logSize = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
-    GLchar *errorLog = calloc(logSize, sizeof(GLchar));
+    GLchar *errorLog = (GLchar *)calloc(logSize, sizeof(GLchar));
     glGetShaderInfoLog(shader, logSize, NULL, errorLog);
     printf("%s", errorLog);
     free(errorLog);
@@ -128,13 +132,14 @@ static GLuint texture_buffer_setup(GLuint program)
     return texturesBuffer;
 }
 
-static int build_program(std::string vertex_shader, std::string fragment_shader)
+static int build_program(std::string *vertex_shader, std::string *fragment_shader)
 {
     GLuint v_shader, f_shader;
 
-    if (!((v_shader = build_shader(vertex_shader.CString(), GL_VERTEX_SHADER)) &&
-          (f_shader = build_shader(fragment_shader.CString(), GL_FRAGMENT_SHADER))))
+    if (!((v_shader = build_shader(vertex_shader->c_str(), GL_VERTEX_SHADER)) &&
+          (f_shader = build_shader(fragment_shader->c_str(), GL_FRAGMENT_SHADER))))
     {
+        printf("failed building shaders");
         return -1;
     }
 
@@ -155,7 +160,7 @@ static int build_program(std::string vertex_shader, std::string fragment_shader)
 
 ProgramInfo build_invert_program()
 {
-    GLuint program = build_program(vertex_shader_text, invert_shader_text);
+    GLuint program = build_program(&vertex_shader_text, &invert_shader_text);
     glUseProgram(program);
     GLuint position_buffer = position_buffer_setup(program);
     GLuint texture_buffer = texture_buffer_setup(program);
@@ -167,7 +172,7 @@ ProgramInfo build_invert_program()
 
 ProgramInfo build_blend_program(float blend_ratio)
 {
-    GLuint program = build_program(vertex_shader_text, blend_shader_text);
+    GLuint program = build_program(&vertex_shader_text, &blend_shader_text);
     glUseProgram(program);
     glUniform1f(glGetUniformLocation(program, "blendFactor"), blend_ratio);
     GLuint position_buffer = position_buffer_setup(program);
@@ -180,8 +185,10 @@ ProgramInfo build_blend_program(float blend_ratio)
 
 void setupOpenGL(int width, int height, float blend_ratio, char *canvasName)
 {
+    printf("setting up with %s\n", canvasName);
 #if FRONTEND == 1
 
+    printf("finding context\n");
     EmscriptenWebGLContextAttributes attrs;
     attrs.explicitSwapControl = 0;
     attrs.depth = 1;
@@ -190,11 +197,12 @@ void setupOpenGL(int width, int height, float blend_ratio, char *canvasName)
     attrs.majorVersion = 1;
     attrs.minorVersion = 0;
 
-    int context = emscripten_webgl_create_context(id, &attrs);
+    int context = emscripten_webgl_create_context(canvasName, &attrs);
+    printf("found context: %d\n", context);
     emscripten_webgl_make_context_current(context);
 
 #else
-
+    printf("wrong option\n");
     glfwInit();
     glfwWindowHint(GLFW_VISIBLE, 0);
     window = glfwCreateWindow(width, height, "", NULL, NULL);
@@ -240,5 +248,7 @@ void tearDownOpenGL()
     glDeleteProgram(invert_program.program);
     glDeleteBuffers(1, &invert_program.position_buffer);
     glDeleteBuffers(1, &invert_program.texture_buffer);
+#if FRONTEND == 0
     glfwDestroyWindow(window);
+#endif
 }

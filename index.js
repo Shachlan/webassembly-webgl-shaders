@@ -21,8 +21,8 @@ window.addEventListener("wasmLoaded", () => {
   canvas.height = 1080;
   const convert = document.getElementById("convert");
 
-  function createCanvas(textureId1, textureId2) {
-    createContext(canvas, 0, textureId1, textureId2);
+  function createCanvas() {
+    createContext(canvas, 0);
   }
 
   function loadFirstVideo(src) {
@@ -44,13 +44,13 @@ window.addEventListener("wasmLoaded", () => {
     const texture2 = initTexture(context);
     const textureId1 = RegisterNativeTextureId(texture1);
     const textureId2 = RegisterNativeTextureId(texture2);
-    createCanvas(textureId1, textureId2);
+    createCanvas();
 
     const frameRenderer = createFrameRenderer(30);
     frameRenderer.render(() => {
       updateTexture(context, texture1, firstVideoElement);
       updateTexture(context, texture2, secondVideoElement);
-      renderFrame();
+      renderFrame(textureId1 - 1, textureId2 - 1);
     });
 
     startVideoStream([firstVideoElement, secondVideoElement]);
