@@ -27,10 +27,5 @@ export function clearContex() {
  * @param {ImageData} secondImageData
  */
 export function renderFrame(textureId1, textureId2) {
-  Module.ccall(
-    "blendTexturesRun",
-    null,
-    ["number", "number"],
-    [textureId1, textureId2]
-  );
+  Module.ccall("invertFrameRun", null, ["number"], [textureId1]);
 }
