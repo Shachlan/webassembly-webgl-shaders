@@ -17,8 +17,9 @@ function UnregisterNativeTextureId(nativeTextureId) {
   return tex;
 }
 
-export function initTexture(gl) {
+export function initTexture(gl, textureEnum) {
   const texture = gl.createTexture();
+  gl.activeTexture(textureEnum);
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
   // Because video havs to be download over the internet

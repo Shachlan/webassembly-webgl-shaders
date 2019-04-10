@@ -40,8 +40,8 @@ window.addEventListener("wasmLoaded", () => {
   convert.addEventListener("click", () => {
     const context = canvas.getContext("webgl");
 
-    const texture1 = initTexture(context);
-    const texture2 = initTexture(context);
+    const texture1 = initTexture(context, context.TEXTURE0);
+    const texture2 = initTexture(context, context.TEXTURE1);
     const textureId1 = RegisterNativeTextureId(texture1);
     const textureId2 = RegisterNativeTextureId(texture2);
     createCanvas();

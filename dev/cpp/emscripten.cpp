@@ -35,6 +35,7 @@ void createContext(int width, int height, float blend_ratio, char *id)
     free(id);
 }
 
+EMSCRIPTEN_KEEPALIVE
 void invertFrameRun(uint32_t texture1)
 {
     invertFrame(texture1);
