@@ -1,25 +1,15 @@
+#include <stdint.h>
 
+extern void setupOpenGL(int width, int height, float blend_ratio, char *canvasName);
 
-class Context {
-public:
-    Context (int width, int height, char * id, GLuint texture1, GLuint texture2);
+extern void invertFrame(uint32_t textureID);
 
-    ~Context (void);
+extern void blendFrames(uint32_t texture1ID, uint32_t texture2ID);
 
-    void run ();
+extern void tearDownOpenGL(void);
 
-private:
-void setupTexture(const GLchar * name, GLenum texture, GLuint texId, int samplerNum);
-
-    int width;
-    int height;
-
-    GLuint programObject;
-    GLuint vertexShader;
-    GLuint fragmentShader;
-    GLuint textureLoc1;
-    GLuint textureLoc2;
-
-    EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context;
-
-};
+#if FRONTEND == 0
+extern uint32_t createTexture(void);
+extern void getCurrentResults(int width, int height, uint8_t *outputBuffer);
+extern void loadTexture(uint32_t textureID, int width, int height, uint8_t *buffer);
+#endif
