@@ -39,7 +39,7 @@ window.addEventListener("wasmLoaded", () => {
   }
 
   function make_clamped_array() {
-    return new Uint8ClampedArray(globalSize.width * globalSize.height * 3);
+    return new Uint8ClampedArray(globalSize.width * globalSize.height * 4);
   }
 
   function make_buffer() {
@@ -78,7 +78,7 @@ window.addEventListener("wasmLoaded", () => {
     const array1 = make_array();
     const buffer2 = make_buffer();
     const array2 = make_array();
-    const result = make_buffer();
+    const result_buffer = make_buffer();
     const result_array = make_clamped_array();
     createCanvas();
 
@@ -86,7 +86,7 @@ window.addEventListener("wasmLoaded", () => {
     frameRenderer.render(() => {
       update_buffer(context1, buffer1, firstVideoElement, array1);
       update_buffer(context2, buffer2, secondVideoElement, array2);
-      renderFrame(buffer1, buffer2, result, result_array);
+      renderFrame(context, buffer1, buffer2, result_buffer, result_array);
     });
 
     startVideoStream([firstVideoElement, secondVideoElement]);
