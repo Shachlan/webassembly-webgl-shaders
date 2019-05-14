@@ -32,14 +32,14 @@ window.addEventListener("wasmLoaded", () => {
   loadFirstVideo("./dog.mp4");
   loadSecondVideo("./race.mp4");
 
-  const array_size = globalSize.width * globalSize.height * 3;
+  const array_size = globalSize.width * globalSize.height * 4;
 
   function make_array() {
-    return new Uint8Array(globalSize.width * globalSize.height * 3);
+    return new Uint8Array(array_size);
   }
 
   function make_clamped_array() {
-    return new Uint8ClampedArray(globalSize.width * globalSize.height * 4);
+    return new Uint8ClampedArray(array_size);
   }
 
   function make_buffer() {

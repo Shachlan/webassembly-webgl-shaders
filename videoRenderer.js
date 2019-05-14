@@ -39,7 +39,7 @@ export function renderFrame(
   result_array.fill(128);
 
   for (let i = 0; i < result_array.length; i++) {
-    result_array.set([Module.HEAPU8[result + i]], i);
+    result_array.set([Module.HEAPU8[result_buffer + i]], i);
   }
 
   const img = new ImageData(result_array, globalSize.width, globalSize.height);

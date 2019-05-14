@@ -7,8 +7,8 @@ export function update_buffer(renderContext, buffer, video, array, tex) {
   renderContext.texImage2D(
     renderContext.TEXTURE_2D,
     0,
-    renderContext.RGB,
-    renderContext.RGB,
+    renderContext.RGBA,
+    renderContext.RGBA,
     renderContext.UNSIGNED_BYTE,
     video
   );
@@ -17,7 +17,7 @@ export function update_buffer(renderContext, buffer, video, array, tex) {
     0,
     globalSize.width,
     globalSize.height,
-    renderContext.RGB,
+    renderContext.RGBA,
     renderContext.UNSIGNED_BYTE,
     array
   );
