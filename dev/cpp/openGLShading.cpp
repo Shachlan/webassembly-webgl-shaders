@@ -2,6 +2,11 @@
 
 #include <string>
 
+#include <GLES2/gl2.h>
+#include <EGL/egl.h>
+
+#define PIXEL_FORMAT GL_RGBA
+
 struct TextureInfo
 {
     uint8_t *buffer;
@@ -25,6 +30,18 @@ bool next_invert;
 
 void setupOpenGL(int width, int height, float blend_ratio, char *canvasName)
 {
+    printf("setup was called\n");
+    EmscriptenWebGLContextAttributes attrs;
+    attrs.explicitSwapControl = 0;
+    attrs.depth = 1;
+    attrs.stencil = 1;
+    attrs.antialias = 1;
+    attrs.majorVersion = 1;
+    attrs.minorVersion = 0;
+
+    int context = emscripten_webgl_create_context(canvasName, &attrs);
+    emscripten_webgl_make_context_current(context);
+
     target_width = width;
     target_height = height;
     target_blend_ratio = blend_ratio;
@@ -32,6 +49,9 @@ void setupOpenGL(int width, int height, float blend_ratio, char *canvasName)
 
 void loadTexture(uint32_t textureID, int width, int height, uint8_t *buffer)
 {
+    glActiveTexture(GL_TEXTURE0);
+    glTexImage2D(GL_TEXTURE_2D, 0, PIXEL_FORMAT, width, height, 0,
+                 PIXEL_FORMAT, GL_UNSIGNED_BYTE, buffer);
     textures[textureID] = (TextureInfo){
         .width = width,
         .height = height,

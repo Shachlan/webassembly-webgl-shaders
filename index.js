@@ -16,10 +16,6 @@ window.addEventListener("wasmLoaded", () => {
   canvas.height = globalSize.height;
   const convert = document.getElementById("convert");
 
-  function createCanvas() {
-    createContext(canvas, 0);
-  }
-
   function loadFirstVideo(src) {
     clearContex();
     firstVideoElement.src = src;
@@ -64,13 +60,15 @@ window.addEventListener("wasmLoaded", () => {
   }
 
   const canvas1 = document.createElement("canvas");
+  canvas1;
   canvas1.width = globalSize.width;
   canvas1.height = globalSize.height;
   const context1 = make_webgl_context(canvas1);
-  const canvas2 = document.createElement("canvas");
-  canvas2.width = globalSize.width;
-  canvas2.height = globalSize.height;
-  const context2 = make_webgl_context(canvas2);
+
+  function createCanvas() {
+    canvas1.id = "rendering canvas";
+    createContext(canvas1, 0);
+  }
 
   convert.addEventListener("click", () => {
     const context = canvas.getContext("2d");
@@ -85,7 +83,7 @@ window.addEventListener("wasmLoaded", () => {
     const frameRenderer = createFrameRenderer(60);
     frameRenderer.render(() => {
       update_buffer(context1, buffer1, firstVideoElement, array1);
-      update_buffer(context2, buffer2, secondVideoElement, array2);
+      //update_buffer(context1, buffer2, secondVideoElement, array2);
       renderFrame(context, buffer1, buffer2, result_buffer, result_array);
     });
 

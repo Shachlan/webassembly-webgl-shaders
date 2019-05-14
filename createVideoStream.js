@@ -12,17 +12,6 @@ export function update_buffer(renderContext, buffer, video, array, tex) {
     renderContext.UNSIGNED_BYTE,
     video
   );
-  renderContext.readPixels(
-    0,
-    0,
-    globalSize.width,
-    globalSize.height,
-    renderContext.RGBA,
-    renderContext.UNSIGNED_BYTE,
-    array
-  );
-
-  Module["HEAPU8"].set(array, buffer);
 }
 
 /**
