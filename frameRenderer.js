@@ -1,8 +1,13 @@
+import Stats from "stats-js";
+
 /**
  *
  * @param {number} fps
  */
 export default function createFrameRenderer(fps) {
+  var stats = new Stats();
+  stats.showPanel(1);
+  document.body.appendChild(stats.dom);
   let wasStopped = false;
   let frameCount = 0;
   const fpsInterval = 1000 / fps;
@@ -27,13 +32,16 @@ export default function createFrameRenderer(fps) {
   }
 
   function renderFrame() {
+    stats.begin();
     if (wasStopped) {
+      stats.end();
       return;
     }
     now = performance.now();
     elapsed = now - then;
 
     if (elapsed <= fpsInterval) {
+      stats.end();
       requestAnimationFrame(renderFrame);
       return;
     }
@@ -45,6 +53,7 @@ export default function createFrameRenderer(fps) {
     }
     then = now - (elapsed % fpsInterval);
     drawCallback();
+    stats.end();
     requestAnimationFrame(renderFrame);
   }
   function stop() {

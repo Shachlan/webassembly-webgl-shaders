@@ -82,7 +82,7 @@ window.addEventListener("wasmLoaded", () => {
     const result_array = make_clamped_array();
     createCanvas();
 
-    const frameRenderer = createFrameRenderer(30);
+    const frameRenderer = createFrameRenderer(60);
     frameRenderer.render(() => {
       update_array(context1, firstVideoElement, array1);
       //update_buffer(context2, buffer2, secondVideoElement, array2);
