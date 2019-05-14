@@ -22,24 +22,14 @@ export function clearContex() {
   Module.ccall("clearContexts", null, null, null);
 }
 
-export function renderFrame(
-  ctx,
-  buffer1,
-  buffer2,
-  result_buffer,
-  result_array
-) {
-  Module.ccall(
-    "invertFrameRun",
-    null,
-    ["number", "number"],
-    [buffer1, result_buffer]
-  );
-
-  result_array.fill(128);
-
-  for (let i = 0; i < result_array.length; i++) {
-    result_array.set([Module.HEAPU8[result + i]], i);
+export function renderFrame(ctx, array1, array2, result_array) {
+  for (let i = 0; i < result_array.length / 4; i++) {
+    let target = i * 4;
+    let source = i * 4;
+    result_array[target] = 255 - array1[source];
+    result_array[target + 1] = 255 - array1[source + 1];
+    result_array[target + 2] = 255 - array1[source + 2];
+    result_array[target + 3] = 255;
   }
 
   const img = new ImageData(result_array, globalSize.width, globalSize.height);

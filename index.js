@@ -1,7 +1,7 @@
 import { size as globalSize } from "./globals";
 import createFrameRenderer from "./frameRenderer";
 
-import { startVideoStream, update_buffer } from "./createVideoStream";
+import { startVideoStream, update_array } from "./createVideoStream";
 import { clearContex, createContext, renderFrame } from "./videoRenderer";
 
 window.addEventListener("wasmLoaded", () => {
@@ -32,10 +32,10 @@ window.addEventListener("wasmLoaded", () => {
   loadFirstVideo("./dog.mp4");
   loadSecondVideo("./race.mp4");
 
-  const array_size = globalSize.width * globalSize.height * 3;
+  const array_size = globalSize.width * globalSize.height * 4;
 
   function make_array() {
-    return new Uint8Array(globalSize.width * globalSize.height * 3);
+    return new Uint8Array(globalSize.width * globalSize.height * 4);
   }
 
   function make_clamped_array() {
@@ -84,9 +84,9 @@ window.addEventListener("wasmLoaded", () => {
 
     const frameRenderer = createFrameRenderer(30);
     frameRenderer.render(() => {
-      update_buffer(context1, buffer1, firstVideoElement, array1);
-      update_buffer(context2, buffer2, secondVideoElement, array2);
-      renderFrame(context, buffer1, buffer2, result_buffer, result_array);
+      update_array(context1, firstVideoElement, array1);
+      //update_buffer(context2, buffer2, secondVideoElement, array2);
+      renderFrame(context, array1, array2, result_array);
     });
 
     startVideoStream([firstVideoElement, secondVideoElement]);

@@ -1,4 +1,4 @@
 export const size = {
-  width: 1080,
-  height: 960
+  width: 1920,
+  height: 1080
 };
