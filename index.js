@@ -46,7 +46,7 @@ window.addEventListener("wasmLoaded", () => {
     const textureId2 = RegisterNativeTextureId(texture2);
     createCanvas();
 
-    const frameRenderer = createFrameRenderer(30);
+    const frameRenderer = createFrameRenderer(60);
     frameRenderer.render(() => {
       updateTexture(context, texture1, firstVideoElement);
       updateTexture(context, texture2, secondVideoElement);
