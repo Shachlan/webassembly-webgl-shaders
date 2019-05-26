@@ -4,6 +4,7 @@
 #include "GLException.hpp"
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "OpenGLHeaders.hpp"
 

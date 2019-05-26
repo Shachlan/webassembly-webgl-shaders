@@ -1,6 +1,4 @@
 #include <stdint.h>
-#include <string>
-using std::string;
 
 void setupOpenGL(int width, int height, char *canvasName);
 

@@ -45,7 +45,8 @@ static SkCanvas *canvas;
 static sk_sp<GrContext> context;
 static sk_sp<SkSurface> surface;
 
-typedef struct {
+typedef struct
+{
   GLuint position_buffer;
   GLuint texture_buffer;
   GLuint vertex_array;
@@ -61,21 +62,24 @@ GLuint backend_texture;
 GLuint vertex_array;
 
 static const float position[12] = {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f,
-                                   -1.0f, 1.0f,  1.0f, -1.0f, 1.0f,  1.0f};
+                                   -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f};
 
 static const float textureCoords[12] = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
                                         0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
 
-uint32_t get_texture() {
+uint32_t get_texture()
+{
   return texture_pool.get_texture();
 }
 
-void release_texture(uint32_t textureID) {
+void release_texture(uint32_t textureID)
+{
   texture_pool.release_texture(textureID);
   texture_pool.flush();
 }
 
-static GLuint generate_vertex_array() {
+static GLuint generate_vertex_array()
+{
   GLuint vao;
   GLCheckDbg("reality check.");
   glGenVertexArrays(1, &vao);
@@ -85,7 +89,8 @@ static GLuint generate_vertex_array() {
   return vao;
 }
 
-static GLuint position_buffer_setup(GLuint program) {
+static GLuint position_buffer_setup(GLuint program)
+{
   GLuint positionBuf;
   glGenBuffers(1, &positionBuf);
   GLCheckDbg("generating position buffer.");
@@ -102,7 +107,8 @@ static GLuint position_buffer_setup(GLuint program) {
   return positionBuf;
 }
 
-static GLuint texture_buffer_setup(GLuint program, string buffer_name) {
+static GLuint texture_buffer_setup(GLuint program, string buffer_name)
+{
   GLuint texturesBuffer;
   glGenBuffers(1, &texturesBuffer);
   GLCheckDbg("generating texture buffer.");
@@ -119,11 +125,13 @@ static GLuint texture_buffer_setup(GLuint program, string buffer_name) {
   return texturesBuffer;
 }
 
-GLuint get_invert_program() {
+GLuint get_invert_program()
+{
   return program_pool.get_program("passthrough", "invert");
 }
 
-ProgramInfo build_invert_program() {
+ProgramInfo build_invert_program()
+{
   GLuint program = get_invert_program();
   GLCheckDbg("generating program.");
   glUseProgram(program);
@@ -135,11 +143,13 @@ ProgramInfo build_invert_program() {
   return (ProgramInfo){position_buffer, texture_buffer, vertex_array};
 }
 
-GLuint get_passthrough_program() {
+GLuint get_passthrough_program()
+{
   return program_pool.get_program("passthrough", "passthrough");
 }
 
-ProgramInfo build_passthrough_program() {
+ProgramInfo build_passthrough_program()
+{
   GLuint program = get_passthrough_program();
   GLCheckDbg("generating program.");
   glUseProgram(program);
@@ -148,15 +158,16 @@ ProgramInfo build_passthrough_program() {
   GLuint position_buffer = position_buffer_setup(program);
   GLuint texture_buffer = texture_buffer_setup(program, "texCoord");
 
-
   return (ProgramInfo){position_buffer, texture_buffer, vertex_array};
 }
 
-GLuint get_blend_program() {
+GLuint get_blend_program()
+{
   return program_pool.get_program("passthrough", "blend");
 }
 
-ProgramInfo build_blend_program() {
+ProgramInfo build_blend_program()
+{
   GLuint program = get_blend_program();
   GLCheckDbg("generating program.");
   glUseProgram(program);
@@ -165,12 +176,13 @@ ProgramInfo build_blend_program() {
   auto vertex_array = generate_vertex_array();
   GLuint position_buffer = position_buffer_setup(program);
   GLCheckDbg("Setting up position buffer.");
-  
+
   GLuint texture_buffer = texture_buffer_setup(program, "texCoord");
   return (ProgramInfo){position_buffer, texture_buffer, vertex_array};
 }
 
-void setupOpenGL(int width, int height, char *canvasName) {
+void setupOpenGL(int width, int height, char *canvasName)
+{
 #if FRONTEND == 1
   EmscriptenWebGLContextAttributes attrs;
   attrs.explicitSwapControl = 0;
@@ -185,7 +197,8 @@ void setupOpenGL(int width, int height, char *canvasName) {
 
 #else
 
-  if (!glfwInit()) {
+  if (!glfwInit())
+  {
     log_error("init failed");
     exit(1);
   }
@@ -197,7 +210,8 @@ void setupOpenGL(int width, int height, char *canvasName) {
   glfwWindowHint(GLFW_VISIBLE, 0);
   log_info("creating window");
   window = glfwCreateWindow(width, height, "", NULL, NULL);
-  if (window == NULL) {
+  if (window == NULL)
+  {
     log_error("no window");
     exit(1);
   }
@@ -222,32 +236,33 @@ void setupOpenGL(int width, int height, char *canvasName) {
   GLCheckDbg("Creating blend.");
   passthrough_program = build_passthrough_program();
 
-
   context = GrContext::MakeGL();
   backend_texture = get_texture();
   glBindTexture(GL_TEXTURE_2D, backend_texture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                nullptr);
   GrGLTextureInfo texture_info = {
-    .fID = backend_texture,
-    .fTarget = GL_TEXTURE_2D,
-    .fFormat = GR_GL_RGBA8
-  };
+      .fID = backend_texture,
+      .fTarget = GL_TEXTURE_2D,
+      .fFormat = GR_GL_RGBA8};
   GrBackendTexture texture(width, height, GrMipMapped::kNo, texture_info);
   surface = sk_sp(SkSurface::MakeFromBackendTexture(context.get(), texture, kTopLeft_GrSurfaceOrigin, 0,
-            kRGBA_8888_SkColorType, nullptr, nullptr));
-  if (!surface) {
+                                                    kRGBA_8888_SkColorType, nullptr, nullptr));
+  if (!surface)
+  {
     log_error("SkSurface::MakeRenderTarget returned null");
     exit(1);
   }
   canvas = surface->getCanvas();
-  if (canvas == nullptr) {
+  if (canvas == nullptr)
+  {
     log_error("no canvas");
     exit(1);
   }
 }
 
-GLuint loadTexture(int width, int height, const uint8_t *buffer) {
+GLuint loadTexture(int width, int height, const uint8_t *buffer)
+{
   GLuint textureID = get_texture();
   GLCheckDbg("get texture");
   glActiveTexture(GL_TEXTURE0 + textureID);
@@ -260,11 +275,12 @@ GLuint loadTexture(int width, int height, const uint8_t *buffer) {
   return textureID;
 }
 
-void invertFrame(uint32_t textureID) {
+void invertFrame(uint32_t textureID)
+{
   auto program = get_invert_program();
   glUseProgram(program);
   glBindVertexArray(invert_program.vertex_array);
-   glBindTexture(GL_TEXTURE_2D, textureID);
+  glBindTexture(GL_TEXTURE_2D, textureID);
   glActiveTexture(GL_TEXTURE0 + textureID);
   glUniform1i(glGetUniformLocation(program, "tex"), textureID);
 
@@ -277,7 +293,8 @@ void invertFrame(uint32_t textureID) {
   GLCheckDbg("Invert.");
 }
 
-void passthroughFrame(uint32_t textureID) {
+void passthroughFrame(uint32_t textureID)
+{
   auto program = get_passthrough_program();
   glUseProgram(program);
   glBindVertexArray(passthrough_program.vertex_array);
@@ -292,23 +309,24 @@ void passthroughFrame(uint32_t textureID) {
   GLCheckDbg("Invert.");
 }
 
-void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio) {
+void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio)
+{
   GLCheckDbg("sanity check");
   auto program = get_blend_program();
   glUseProgram(program);
   GLCheckDbg("use blend program");
   glBindVertexArray(blend_program.vertex_array);
-   GLCheckDbg("bind vertex array");
+  GLCheckDbg("bind vertex array");
   glUniform1f(glGetUniformLocation(program, "blendFactor"), blend_ratio);
-   GLCheckDbg("set blend factor");
-   glBindTexture(GL_TEXTURE_2D, texture1ID);
-   GLCheckDbg("bind texture 1.");
+  GLCheckDbg("set blend factor");
+  glBindTexture(GL_TEXTURE_2D, texture1ID);
+  GLCheckDbg("bind texture 1.");
   glActiveTexture(GL_TEXTURE0 + texture1ID);
   GLCheckDbg("active texture 1");
   glUniform1i(glGetUniformLocation(program, "tex1"), texture1ID);
   GLCheckDbg("set texture 1");
-   glBindTexture(GL_TEXTURE_2D, texture2ID);
-   GLCheckDbg("bind texture 2.");
+  glBindTexture(GL_TEXTURE_2D, texture2ID);
+  GLCheckDbg("bind texture 2.");
   glActiveTexture(GL_TEXTURE0 + texture2ID);
   GLCheckDbg("active texture 2");
   glUniform1i(glGetUniformLocation(program, "tex2"), texture2ID);
@@ -318,11 +336,13 @@ void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio) {
   GLCheckDbg("Draw.");
 }
 
-void getCurrentResults(int width, int height, uint8_t *outputBuffer) {
+void getCurrentResults(int width, int height, uint8_t *outputBuffer)
+{
   glReadPixels(0, 0, width, height, PIXEL_FORMAT, GL_UNSIGNED_BYTE, outputBuffer);
 }
 
-uint32_t render_text(string text) {
+uint32_t render_text(string text)
+{
   GLCheckDbg("Entering skia");
   glBindVertexArray(0);
   context->resetContext();
@@ -348,13 +368,14 @@ uint32_t render_text(string text) {
   // GLCheckDbg("Skia get texture");
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glClearColor(0,0,0,0);
+  glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT);
 
   return backend_texture;
 }
 
-void tearDownOpenGL() {
+void tearDownOpenGL()
+{
   glDeleteBuffers(1, &invert_program.position_buffer);
   glDeleteBuffers(1, &invert_program.texture_buffer);
   glDeleteBuffers(1, &blend_program.position_buffer);
