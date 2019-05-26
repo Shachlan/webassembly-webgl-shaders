@@ -4,7 +4,10 @@
 
 #if FRONTEND == 1
 #include <EGL/egl.h>
+#include <GLES3/gl3.h>
 #include <GLES2/gl2.h>
+#include <emscripten.h>
+#include "html5.h"
 
 #define PIXEL_FORMAT GL_RGBA
 
@@ -42,7 +45,7 @@ static ProgramPool program_pool;
 static TexturePool texture_pool;
 
 static SkCanvas *canvas;
-static sk_sp<GrContext> context;
+static sk_sp<GrContext> skiaContext;
 static sk_sp<SkSurface> surface;
 
 typedef struct
@@ -192,8 +195,8 @@ void setupOpenGL(int width, int height, char *canvasName)
   attrs.majorVersion = 1;
   attrs.minorVersion = 0;
 
-  int context = emscripten_webgl_create_context(canvasName, &attrs);
-  emscripten_webgl_make_context_current(context);
+  int emscripten_context = emscripten_webgl_create_context(canvasName, &attrs);
+  emscripten_webgl_make_context_current(emscripten_context);
 
 #else
 
@@ -236,7 +239,7 @@ void setupOpenGL(int width, int height, char *canvasName)
   GLCheckDbg("Creating blend.");
   passthrough_program = build_passthrough_program();
 
-  context = GrContext::MakeGL();
+  skiaContext = GrContext::MakeGL();
   backend_texture = get_texture();
   glBindTexture(GL_TEXTURE_2D, backend_texture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -246,7 +249,7 @@ void setupOpenGL(int width, int height, char *canvasName)
       .fTarget = GL_TEXTURE_2D,
       .fFormat = GR_GL_RGBA8};
   GrBackendTexture texture(width, height, GrMipMapped::kNo, texture_info);
-  surface = sk_sp(SkSurface::MakeFromBackendTexture(context.get(), texture, kTopLeft_GrSurfaceOrigin, 0,
+  surface = sk_sp(SkSurface::MakeFromBackendTexture(skiaContext.get(), texture, kTopLeft_GrSurfaceOrigin, 0,
                                                     kRGBA_8888_SkColorType, nullptr, nullptr));
   if (!surface)
   {
@@ -345,7 +348,7 @@ uint32_t render_text(string text)
 {
   GLCheckDbg("Entering skia");
   glBindVertexArray(0);
-  context->resetContext();
+  skiaContext->resetContext();
   canvas->clear(SkColorSetARGB(0, 0, 0, 0));
   auto text_color = SkColor4f::FromColor(SkColorSetARGB(255, 0, 0, 255));
   SkPaint paint2(text_color);
