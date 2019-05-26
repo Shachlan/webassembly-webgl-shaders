@@ -41,6 +41,7 @@ void setupOpenGL(int width, int height, float blend_ratio, char *canvasName)
 
     int context = emscripten_webgl_create_context(canvasName, &attrs);
     emscripten_webgl_make_context_current(context);
+    glViewport(0, 0, width, height);
 
     target_width = width;
     target_height = height;

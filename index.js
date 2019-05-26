@@ -63,7 +63,6 @@ window.addEventListener("wasmLoaded", () => {
   canvas1;
   canvas1.width = globalSize.width;
   canvas1.height = globalSize.height;
-  const context1 = make_webgl_context(canvas1);
 
   function createCanvas() {
     canvas1.id = "rendering canvas";
@@ -79,6 +78,7 @@ window.addEventListener("wasmLoaded", () => {
     const result_buffer = make_buffer();
     const result_array = make_clamped_array();
     createCanvas();
+    const context1 = make_webgl_context(canvas1);
 
     const frameRenderer = createFrameRenderer(60);
     frameRenderer.render(() => {
