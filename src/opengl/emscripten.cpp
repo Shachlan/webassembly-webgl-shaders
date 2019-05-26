@@ -2,10 +2,7 @@
 
 #include <emscripten.h>
 #include <string>
-extern "C"
-{
-#include "html5.h"
-}
+#include "html5.hpp"
 #include "openGLShading.hpp"
 
 int main(int argc, char const *argv[])
