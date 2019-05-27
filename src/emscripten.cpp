@@ -1,9 +1,7 @@
-#define FRONTEND 1
-
 #include <emscripten.h>
 #include <string>
 #include "html5.hpp"
-#include "openGLShading.hpp"
+#include "opengl/openGLShading.cpp"
 
 int main(int argc, char const *argv[])
 {
