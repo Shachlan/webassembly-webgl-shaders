@@ -1,4 +1,5 @@
 #include <emscripten.h>
+#include <iostream>
 #include <string>
 extern "C"
 {
@@ -31,7 +32,11 @@ extern "C"
     void createContext(int width, int height, char *id)
     {
         printf("creating %s context\n", id);
-        setupOpenGL(width, height, id);
+        try {
+            setupOpenGL(width, height, id);
+        }  catch (std::exception ex) {
+            std::cout << ex.what() << '\n';
+        }
         free(id);
     }
 

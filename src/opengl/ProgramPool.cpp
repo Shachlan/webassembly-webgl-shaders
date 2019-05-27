@@ -9,6 +9,54 @@
 
 #include "OpenGLHeaders.hpp"
 
+#if FRONTEND==1
+
+static string blend_fragment = "#version 100\n"
+"uniform sampler2D tex1;\n"
+"uniform sampler2D tex2;\n"
+"uniform float blendFactor;\n"
+"in vec2 vTexCoord;\n"
+"out vec4 FragColor;\n"
+"\n"
+"void main() {\n"
+"    vec4 color1 = texture(tex1, vTexCoord);\n"
+"    vec4 color2 = texture(tex2, vTexCoord);\n"
+"    FragColor = (color1 * blendFactor) + (color2 * (1.0 - blendFactor));\n"
+"}";
+
+static string invert_fragment = "#version 100\n"
+"\n"
+"uniform sampler2D tex;\n"
+"in vec2 vTexCoord;\n"
+"out vec4 FragColor;\n"
+"\n"
+"void main() {\n"
+"    const vec3 kInvert = vec3(1, 1, 1);\n"
+"    FragColor = vec4(kInvert - texture(tex, vTexCoord).rgb, 1);\n"
+"}";
+
+static string passthrough_fragment = "#version 100\n"
+"\n"
+"uniform sampler2D tex;\n"
+"in vec2 vTexCoord;\n"
+"out vec4 FragColor;\n"
+"\n"
+"void main() {\n"
+"    FragColor = texture(tex, vTexCoord);\n"
+"}";
+
+static string passthrough_vertex = "#version 100\n"
+"\n"
+"in vec2 position;\n"
+"in vec2 texCoord;\n"
+"out vec2 vTexCoord;\n"
+"void main(void) {\n"
+"    gl_Position = vec4(position, 0, 1);\n"
+"    vTexCoord = texCoord;\n"
+"}";
+
+#endif
+
 using namespace WREOpenGL;
 
 void ProgramPool::delete_program(GLuint program_name) {
@@ -70,7 +118,29 @@ static GLuint build_shader(const GLchar *shader_source, GLenum shader_type) {
   return 0;
 }
 
-static string get_shader_text(string shader_file_name) {
+#if FRONTEND==1
+
+static string get_shader_text(string shader_name, GLenum shader_type) {
+  if (shader_type == GL_VERTEX_SHADER) {
+    return passthrough_vertex;
+  }
+  if (shader_name == "blend") {
+    return blend_fragment;
+  }
+  if (shader_name == "passthrough") {
+    return passthrough_fragment;
+  }
+  return invert_fragment;
+}
+
+#else
+
+static string get_shader_filename(string shader, GLenum shader_type) {
+  return shader + (shader_type == GL_VERTEX_SHADER ? ".vsh" : ".fsh");
+}
+
+static string get_shader_text(string shader_name, GLenum shader_type) {
+  auto shader_file_name = get_shader_filename(shader_name, shader_type);
   std::ifstream stream(shader_file_name);
   if (!stream.is_open()) {
     throw_gl_exception("Can't open shader file %s", shader_file_name.c_str());
@@ -80,15 +150,12 @@ static string get_shader_text(string shader_file_name) {
   return buffer.str();
 }
 
-int build_shader(string shader_file_name, GLenum shader_type) {
-  auto text = get_shader_text(shader_file_name);
-  auto shader_name = build_shader(text.c_str(), shader_type);
+#endif
 
-  return shader_name;
-}
+int build_shader(string shader_name, GLenum shader_type) {
+  auto text = get_shader_text(shader_name, shader_type);
 
-string get_shader_filename(string shader, GLenum shader_type) {
-  return shader + (shader_type == GL_VERTEX_SHADER ? ".vsh" : ".fsh");
+  return build_shader(text.c_str(), shader_type);
 }
 
 GLuint create_program(GLuint vertex_shader, GLuint fragment_shader) {
@@ -123,10 +190,8 @@ GLuint ProgramPool::get_program(string vertex_shader, string fragment_shader) {
     return search->second;
   }
 
-  auto v_shader_filename = get_shader_filename(vertex_shader, GL_VERTEX_SHADER);
-  auto v_shader_name = build_shader(v_shader_filename, GL_VERTEX_SHADER);
-  auto f_shader_filename = get_shader_filename(fragment_shader, GL_FRAGMENT_SHADER);
-  auto f_shader_name = build_shader(f_shader_filename, GL_FRAGMENT_SHADER);
+  auto v_shader_name = build_shader(vertex_shader, GL_VERTEX_SHADER);
+  auto f_shader_name = build_shader(fragment_shader, GL_FRAGMENT_SHADER);
   auto program = create_program(v_shader_name, f_shader_name);
 
   this->description_to_name_mapping[key] = program;

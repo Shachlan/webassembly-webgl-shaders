@@ -12,8 +12,8 @@ export function createContext(canvas, index) {
   Module.ccall(
     "createContext",
     null,
-    ["number", "number", "number", "number"],
-    [canvas.width, canvas.height, 0.3, idBuffer]
+    ["number", "number", "number"],
+    [canvas.width, canvas.height, idBuffer]
   );
 }
 
