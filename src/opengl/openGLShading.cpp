@@ -3,6 +3,11 @@
 #include <string>
 
 #if FRONTEND == 1
+#include <emscripten.h>
+extern "C"
+{
+#include "html5.h"
+}
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
 #include <GLES2/gl2.h>

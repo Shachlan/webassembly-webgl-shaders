@@ -1,7 +1,10 @@
 #include <emscripten.h>
 #include <string>
-#include "html5.hpp"
-#include "opengl/openGLShading.cpp"
+extern "C"
+{
+#include "html5.h"
+}
+#include "opengl/openGLShading.hpp"
 
 int main(int argc, char const *argv[])
 {
