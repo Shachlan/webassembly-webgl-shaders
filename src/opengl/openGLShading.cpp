@@ -6,8 +6,6 @@
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
 #include <GLES2/gl2.h>
-#include <emscripten.h>
-#include "html5.hpp"
 
 #define PIXEL_FORMAT GL_RGBA
 
