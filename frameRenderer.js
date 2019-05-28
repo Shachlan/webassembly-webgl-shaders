@@ -6,8 +6,8 @@ import Stats from "stats-js";
  */
 export default function createFrameRenderer(fps) {
   var stats = new Stats();
-  stats.showPanel(1);
-  document.body.appendChild(stats.dom);
+  // stats.showPanel(1);
+  // document.body.appendChild(stats.dom);
   let wasStopped = false;
   let frameCount = 0;
   const fpsInterval = 1000 / fps;

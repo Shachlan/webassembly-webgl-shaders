@@ -57,6 +57,7 @@ void throw_gl_exception(string format, ...)
   auto exception = get_exception(format, argList);
   va_end(argList);
 
+  log_debug("%s", exception.what());
   throw exception;
 }
 
@@ -88,6 +89,7 @@ void check_gl_errors(string format, ...)
   auto exception = get_exception(format, argList);
   va_end(argList);
 
+  log_debug("%s", exception.what());
   throw exception;
 }
 

@@ -67,8 +67,17 @@ GLFWwindow *window;
 GLuint backend_texture;
 GLuint vertex_array;
 
+#if FRONTEND == 1
+
+static const float position[12] = {1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f,
+                                   1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f};
+
+#else
+
 static const float position[12] = {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f,
                                    -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f};
+
+#endif
 
 static const float textureCoords[12] = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
                                         0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
@@ -197,6 +206,7 @@ void setupOpenGL(int width, int height, char *canvasName)
   attrs.antialias = 1;
   attrs.majorVersion = 1;
   attrs.minorVersion = 0;
+  attrs.enableExtensionsByDefault = true;
 
   int emscripten_context = emscripten_webgl_create_context(canvasName, &attrs);
   emscripten_webgl_make_context_current(emscripten_context);
@@ -283,6 +293,10 @@ GLuint loadTexture(int width, int height, const uint8_t *buffer)
 
 void invertFrame(uint32_t textureID)
 {
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glClearColor(0, 0, 0, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
+
   auto program = get_invert_program();
   glUseProgram(program);
   glBindVertexArray(invert_program.vertex_array);
@@ -301,6 +315,10 @@ void invertFrame(uint32_t textureID)
 
 void passthroughFrame(uint32_t textureID)
 {
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glClearColor(0, 0, 0, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
+
   auto program = get_passthrough_program();
   glUseProgram(program);
   glBindVertexArray(passthrough_program.vertex_array);
@@ -317,6 +335,10 @@ void passthroughFrame(uint32_t textureID)
 
 void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio)
 {
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glClearColor(0, 0, 0, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
+
   GLCheckDbg("sanity check");
   auto program = get_blend_program();
   glUseProgram(program);

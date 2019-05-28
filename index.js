@@ -50,7 +50,7 @@ window.addEventListener("wasmLoaded", () => {
     frameRenderer.render(() => {
       updateTexture(context, texture1, firstVideoElement);
       updateTexture(context, texture2, secondVideoElement);
-      renderFrame(textureId1 - 1, textureId2 - 1);
+      renderFrame(textureId1, textureId2);
     });
 
     startVideoStream([firstVideoElement, secondVideoElement]);
