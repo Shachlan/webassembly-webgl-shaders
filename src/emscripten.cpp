@@ -51,4 +51,11 @@ extern "C"
     {
         blendFrames(texture1, texture2, blend_ratio);
     }
+
+    EMSCRIPTEN_KEEPALIVE
+    uint32_t renderTextRun(char *text)
+    {
+        std::string str(text);
+        return render_text(str);
+    }
 }

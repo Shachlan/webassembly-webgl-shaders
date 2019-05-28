@@ -300,8 +300,8 @@ void invertFrame(uint32_t textureID)
   auto program = get_invert_program();
   glUseProgram(program);
   glBindVertexArray(invert_program.vertex_array);
-  glBindTexture(GL_TEXTURE_2D, textureID);
   glActiveTexture(GL_TEXTURE0 + textureID);
+  glBindTexture(GL_TEXTURE_2D, textureID);
   glUniform1i(glGetUniformLocation(program, "tex"), textureID);
 
   glBindBuffer(GL_ARRAY_BUFFER, invert_program.texture_buffer);
@@ -347,19 +347,21 @@ void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio)
   GLCheckDbg("bind vertex array");
   glUniform1f(glGetUniformLocation(program, "blendFactor"), blend_ratio);
   GLCheckDbg("set blend factor");
-  glBindTexture(GL_TEXTURE_2D, texture1ID);
-  GLCheckDbg("bind texture 1.");
+
   glActiveTexture(GL_TEXTURE0 + texture1ID);
   GLCheckDbg("active texture 1");
+  glBindTexture(GL_TEXTURE_2D, texture1ID);
+  GLCheckDbg("bind texture 1.");
   glUniform1i(glGetUniformLocation(program, "tex1"), texture1ID);
+
   GLCheckDbg("set texture 1");
-  glBindTexture(GL_TEXTURE_2D, texture2ID);
-  GLCheckDbg("bind texture 2.");
   glActiveTexture(GL_TEXTURE0 + texture2ID);
   GLCheckDbg("active texture 2");
+  glBindTexture(GL_TEXTURE_2D, texture2ID);
+  GLCheckDbg("bind texture 2.");
   glUniform1i(glGetUniformLocation(program, "tex2"), texture2ID);
   GLCheckDbg("set texture 2");
-  GLCheckDbg("Setting up draw.");
+
   glDrawArrays(GL_TRIANGLES, 0, 6);
   GLCheckDbg("Draw.");
 }

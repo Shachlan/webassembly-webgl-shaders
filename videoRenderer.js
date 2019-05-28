@@ -27,5 +27,10 @@ export function clearContex() {
  * @param {ImageData} secondImageData
  */
 export function renderFrame(textureId1, textureId2) {
-  Module.ccall("invertFrameRun", null, ["number"], [textureId1]);
+  // Module.ccall("invertFrameRun", null, ["number"], [textureId1]);
+  // const text = "Hello, World";
+  // const idBuffer = Module._malloc(text.length + 1);
+  // stringToUTF8(text, idBuffer, text.length + 1);
+  // var skiaTexture = Module.ccall("renderTextRun", "number", ["number"], [idBuffer]);
+  Module.ccall("blendTexturesRun", null, ["number", "number", "number"], [textureId1, textureId2, 0.5]);
 }
