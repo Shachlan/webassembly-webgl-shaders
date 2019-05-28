@@ -33,7 +33,7 @@ static string invert_fragment = "#version 100\n"
 "\n"
 "void main() {\n"
 "    const vec3 kInvert = vec3(1, 1, 1);\n"
-"    gl_FragColor = vec4(kInvert - texture2D(tex, vTexCoord).rgb, 1);\n"
+"    gl_FragColor = vec4(texture2D(tex, vTexCoord).rgb, 1);\n"
 "}";
 
 static string passthrough_fragment = "#version 100\n"

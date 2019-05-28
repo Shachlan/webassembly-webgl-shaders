@@ -4,6 +4,8 @@ void setupOpenGL(int width, int height, char *canvasName);
 
 void invertFrame(uint32_t textureID);
 
+void passthroughFrame(uint32_t textureID);
+
 void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio);
 
 void tearDownOpenGL();

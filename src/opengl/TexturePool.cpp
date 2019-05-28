@@ -9,7 +9,6 @@ using namespace WREOpenGL;
 
 GLuint create_texture()
 {
-  log_info("create texture");
   GLuint textureLoc;
   glGenTextures(1, &textureLoc);
   GLCheckDbg("Failed to generate texture.");
@@ -22,6 +21,7 @@ GLuint create_texture()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glBindTexture(GL_TEXTURE_2D, 0);
   GLCheckDbg("Failed to setup texture.");
+  log_debug("created texture %d", textureLoc);
   return textureLoc;
 }
 

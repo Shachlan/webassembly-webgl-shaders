@@ -313,8 +313,7 @@ void invertFrame(uint32_t textureID)
   GLCheckDbg("Invert.");
 }
 
-void passthroughFrame(uint32_t textureID)
-{
+void passthroughFrame(uint32_t textureID) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -322,6 +321,8 @@ void passthroughFrame(uint32_t textureID)
   auto program = get_passthrough_program();
   glUseProgram(program);
   glBindVertexArray(passthrough_program.vertex_array);
+  glActiveTexture(GL_TEXTURE0 + textureID);
+  glBindTexture(GL_TEXTURE_2D, textureID);
   glUniform1i(glGetUniformLocation(program, "tex"), textureID);
 
   glBindBuffer(GL_ARRAY_BUFFER, passthrough_program.texture_buffer);
@@ -333,8 +334,7 @@ void passthroughFrame(uint32_t textureID)
   GLCheckDbg("Invert.");
 }
 
-void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio)
-{
+void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT);

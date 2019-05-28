@@ -14,7 +14,23 @@ module.exports = grunt => {
 
     exec: {
       build:
-        "emcc -g4 -o ./assets/appWASM.js ./src/*.cpp ./src/opengl/*.cpp ./third_party/skia/out/Build-wasm-Release/Release/*.a -O3 -s LEGACY_GL_EMULATION=0 -s ALLOW_MEMORY_GROWTH=1 -s USE_WEBGL2=1 -s WASM=0 -s NO_EXIT_RUNTIME=1 -s EXTRA_EXPORTED_RUNTIME_METHODS=['ccall'] -std=c++17 -include all.hpp -I./src -I./third_party/skia/include/core -I./third_party/skia/include/gpu -I./third_party/skia/ -DFRONTEND=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0"
+        "emcc -g4 -o ./assets/appWASM.js ./src/*.cpp ./src/opengl/*.cpp \
+        ./third_party/skia/out/Build-wasm-Release/Release/*.a \
+        -O3 \
+        -s LEGACY_GL_EMULATION=0 \
+        -s ALLOW_MEMORY_GROWTH=1 \
+        -s USE_WEBGL2=1 \
+        -s WASM=0 \
+        -s NO_EXIT_RUNTIME=1 \
+        -s EXTRA_EXPORTED_RUNTIME_METHODS=['ccall'] \
+        -std=c++17 -include all.hpp \
+        -I./src -I./third_party/skia/include/core \
+        -I./third_party/skia/include/gpu \
+        -I./third_party/skia/ \
+        -DFRONTEND=1 \
+        -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
+        -s USE_LIBPNG=1 \
+        -s USE_FREETYPE=1"
     },
 
     watch: {

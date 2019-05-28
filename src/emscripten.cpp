@@ -47,6 +47,12 @@ extern "C"
     }
 
     EMSCRIPTEN_KEEPALIVE
+    void passthroughFrameRun(uint32_t texture1)
+    {
+        passthroughFrame(texture1);
+    }
+
+    EMSCRIPTEN_KEEPALIVE
     void blendTexturesRun(uint32_t texture1, uint32_t texture2, float blend_ratio)
     {
         blendFrames(texture1, texture2, blend_ratio);
