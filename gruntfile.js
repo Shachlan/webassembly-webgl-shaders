@@ -16,6 +16,7 @@ module.exports = grunt => {
       build:
         "emcc -g4 -o ./assets/appWASM.js ./src/*.cpp ./src/opengl/*.cpp \
         ./third_party/skia/out/Build-wasm-Release/Release/*.a \
+        -g4 \
         -O3 \
         -s LEGACY_GL_EMULATION=0 \
         -s ALLOW_MEMORY_GROWTH=1 \
@@ -30,7 +31,8 @@ module.exports = grunt => {
         -DFRONTEND=1 \
         -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
         -s USE_LIBPNG=1 \
-        -s USE_FREETYPE=1"
+        -s USE_FREETYPE=1 \
+        --embed-file ./fonts"
     },
 
     watch: {

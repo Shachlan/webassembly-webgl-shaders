@@ -1,5 +1,6 @@
 #include "openGLShading.hpp"
 
+#include <fstream>
 #include <string>
 
 #if FRONTEND == 1
@@ -9,8 +10,8 @@ extern "C"
 #include "html5.h"
 }
 #include <EGL/egl.h>
-#include <GLES3/gl3.h>
 #include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 
 #define PIXEL_FORMAT GL_RGBA
 
@@ -30,17 +31,19 @@ extern "C"
 #include "ProgramPool.hpp"
 #include "TexturePool.hpp"
 
+#include <src/gpu/gl/GrGlDefines.h>
+#include <sstream>
 #include "GrContext.h"
 #include "SkData.h"
 #include "SkFont.h"
 #include "SkImage.h"
 #include "SkPaint.h"
 #include "SkStream.h"
+#include "SkString.h"
 #include "SkSurface.h"
 #include "SkTextBlob.h"
+#include "SkTypeface.h"
 #include "gl/GrGLInterface.h"
-#include <sstream>
-#include <src/gpu/gl/GrGlDefines.h>
 
 using namespace WREOpenGL;
 
@@ -66,11 +69,12 @@ GLFWwindow *window;
 #endif
 GLuint backend_texture;
 GLuint vertex_array;
+static sk_sp<SkTypeface> typeface;
 
 #if FRONTEND == 1
 
-static const float position[12] = {1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f,
-                                   1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f};
+static const float position[12] = {-1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f,
+                                   -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f};
 
 #else
 
@@ -255,15 +259,15 @@ void setupOpenGL(int width, int height, char *canvasName)
   skiaContext = GrContext::MakeGL();
   backend_texture = get_texture();
   glBindTexture(GL_TEXTURE_2D, backend_texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-               nullptr);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
   GrGLTextureInfo texture_info = {
-      .fID = backend_texture,
-      .fTarget = GL_TEXTURE_2D,
-      .fFormat = GR_GL_RGBA8};
+      .fID = backend_texture, .fTarget = GL_TEXTURE_2D, .fFormat = GR_GL_RGBA8};
   GrBackendTexture texture(width, height, GrMipMapped::kNo, texture_info);
-  surface = sk_sp(SkSurface::MakeFromBackendTexture(skiaContext.get(), texture, kTopLeft_GrSurfaceOrigin, 0,
-                                                    kRGBA_8888_SkColorType, nullptr, nullptr));
+
+  surface =
+      sk_sp(SkSurface::MakeFromBackendTexture(skiaContext.get(), texture, kTopLeft_GrSurfaceOrigin,
+                                              0, kRGBA_8888_SkColorType, nullptr, nullptr));
+
   if (!surface)
   {
     log_error("SkSurface::MakeRenderTarget returned null");
@@ -275,6 +279,8 @@ void setupOpenGL(int width, int height, char *canvasName)
     log_error("no canvas");
     exit(1);
   }
+
+  typeface = SkTypeface::MakeFromFile("./fonts/pacifico/Pacifico.ttf");
 }
 
 GLuint loadTexture(int width, int height, const uint8_t *buffer)
@@ -313,7 +319,8 @@ void invertFrame(uint32_t textureID)
   GLCheckDbg("Invert.");
 }
 
-void passthroughFrame(uint32_t textureID) {
+void passthroughFrame(uint32_t textureID)
+{
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -334,7 +341,8 @@ void passthroughFrame(uint32_t textureID) {
   GLCheckDbg("Invert.");
 }
 
-void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio) {
+void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio)
+{
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -376,11 +384,22 @@ uint32_t render_text(string text)
   GLCheckDbg("Entering skia");
   glBindVertexArray(0);
   skiaContext->resetContext();
-  canvas->clear(SkColorSetARGB(0, 0, 0, 0));
+  canvas->clear(SkColorSetARGB(255, 0, 0, 0));
   auto text_color = SkColor4f::FromColor(SkColorSetARGB(255, 0, 0, 255));
   SkPaint paint2(text_color);
-  auto text_blob = SkTextBlob::MakeFromString(text.c_str(), SkFont(nullptr, 22));
-  canvas->drawTextBlob(text_blob.get(), 100, 50, paint2);
+  if (typeface == nullptr)
+  {
+    log_error("no typeface");
+    exit(1);
+  }
+  // SkString type_name;
+  // typeface->getFamilyName(&type_name);
+  // log_debug("getting family name");
+  // auto ID = typeface->uniqueID();
+  // log_debug("getting unique ID");
+  // log_info("type name: %s, ID: %d", type_name.c_str(), ID);
+  auto text_blob = SkTextBlob::MakeFromString(text.c_str(), SkFont(typeface, 220));
+  canvas->drawTextBlob(text_blob.get(), 100, 250, paint2);
   canvas->flush();
   GLCheckDbg("Skia");
 
@@ -394,12 +413,7 @@ uint32_t render_text(string text)
   //   log_error("missing texture info");
   //   exit(1);
   // }
-
-  // GLCheckDbg("Skia get texture");
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glClearColor(0, 0, 0, 0);
-  glClear(GL_COLOR_BUFFER_BIT);
+  // return texture_info.fID;
 
   return backend_texture;
 }
