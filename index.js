@@ -37,6 +37,8 @@ window.addEventListener("wasmLoaded", () => {
   loadFirstVideo("./dog.mp4");
   loadSecondVideo("./race.mp4");
 
+  let counter = 0;
+
   convert.addEventListener("click", () => {
     const context = canvas.getContext("webgl");
 
@@ -50,7 +52,8 @@ window.addEventListener("wasmLoaded", () => {
     frameRenderer.render(() => {
       updateTexture(context, texture1, firstVideoElement);
       updateTexture(context, texture2, secondVideoElement);
-      renderFrame(textureId1, textureId2);
+      renderFrame(textureId1, textureId2, counter);
+      counter += 0.1;
     });
 
     startVideoStream([firstVideoElement, secondVideoElement]);

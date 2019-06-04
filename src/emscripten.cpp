@@ -32,24 +32,15 @@ extern "C"
     void createContext(int width, int height, char *id)
     {
         printf("creating %s context\n", id);
-        try {
+        try
+        {
             setupOpenGL(width, height, id);
-        }  catch (std::exception ex) {
+        }
+        catch (std::exception ex)
+        {
             std::cout << ex.what() << '\n';
         }
         free(id);
-    }
-
-    EMSCRIPTEN_KEEPALIVE
-    void invertFrameRun(uint32_t texture1)
-    {
-        invertFrame(texture1);
-    }
-
-    EMSCRIPTEN_KEEPALIVE
-    void passthroughFrameRun(uint32_t texture1)
-    {
-        passthroughFrame(texture1);
     }
 
     EMSCRIPTEN_KEEPALIVE
@@ -63,5 +54,11 @@ extern "C"
     {
         std::string str(text);
         return render_text(str);
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    uint32_t render_lottieRun(double time)
+    {
+        return render_lottie(time);
     }
 }

@@ -14,8 +14,17 @@ module.exports = grunt => {
 
     exec: {
       build:
-        "emcc -g4 -o ./assets/appWASM.js ./src/*.cpp ./src/opengl/*.cpp \
-        ./third_party/skia/out/Build-wasm-Release/Release/*.a \
+        "cd third_party/Skia &&\
+        ./build_skia_wasm_bitcode.sh &&\
+        cd .. &&\
+        cd .. &&\
+        em++ -g4 -o ./assets/appWASM.js ./src/*.cpp ./src/opengl/*.cpp \
+        -std=c++17 -include all.hpp \
+        -I./src -I./third_party/skia/include/core \
+        -I./third_party/skia/include/gpu \
+        -I./third_party/skia/ \
+        -DFRONTEND=1 \
+        ./third_party/skia/out/debugger_wasm/*.a \
         -g4 \
         -O3 \
         -s LEGACY_GL_EMULATION=0 \
@@ -24,15 +33,11 @@ module.exports = grunt => {
         -s WASM=0 \
         -s NO_EXIT_RUNTIME=1 \
         -s EXTRA_EXPORTED_RUNTIME_METHODS=['ccall'] \
-        -std=c++17 -include all.hpp \
-        -I./src -I./third_party/skia/include/core \
-        -I./third_party/skia/include/gpu \
-        -I./third_party/skia/ \
-        -DFRONTEND=1 \
         -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
         -s USE_LIBPNG=1 \
         -s USE_FREETYPE=1 \
-        --embed-file ./fonts"
+        --embed-file ./fonts \
+        --embed-file ./data.json"
     },
 
     watch: {
