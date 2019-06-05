@@ -14,7 +14,9 @@ module.exports = grunt => {
 
     exec: {
       build:
-        "cd third_party/Skia &&\
+        "~/emsdk/emsdk activate latest &&\
+        source ~/emsdk/emsdk_env.sh &&\
+        cd third_party/Skia &&\
         ./build_skia_wasm_bitcode.sh &&\
         cd .. &&\
         cd .. &&\
@@ -37,7 +39,8 @@ module.exports = grunt => {
         -s USE_LIBPNG=1 \
         -s USE_FREETYPE=1 \
         --embed-file ./fonts \
-        --embed-file ./data.json"
+        --embed-file ./data.json \
+        -v"
     },
 
     watch: {
