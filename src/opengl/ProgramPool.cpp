@@ -9,52 +9,69 @@
 
 #include "OpenGLHeaders.hpp"
 
-#if FRONTEND==1
+#if FRONTEND == 1
 
-static string blend_fragment = "#version 100\n"
-"precision mediump float;\n"
-"\n"
-"uniform sampler2D tex1;\n"
-"uniform sampler2D tex2;\n"
-"uniform float blendFactor;\n"
-"varying vec2 vTexCoord;\n"
-"\n"
-"void main() {\n"
-"    vec4 color1 = texture2D(tex1, vTexCoord);\n"
-"    vec4 color2 = texture2D(tex2, vTexCoord);\n"
-"    gl_FragColor = (color1 * blendFactor) + (color2 * (1.0 - blendFactor));\n"
-"}";
+static string blend_fragment =
+    "#version 100\n"
+    "precision mediump float;\n"
+    "\n"
+    "uniform sampler2D tex1;\n"
+    "uniform sampler2D tex2;\n"
+    "uniform sampler2D tex3;\n"
+    "uniform sampler2D tex4;\n"
+    "uniform sampler2D tex5;\n"
+    "uniform sampler2D tex6;\n"
+    "uniform sampler2D tex7;\n"
+    "uniform sampler2D tex8;\n"
+    "uniform float blendFactor;\n"
+    "varying vec2 vTexCoord;\n"
+    "\n"
+    "void main() {\n"
+    "    vec4 color1 = texture2D(tex1, vTexCoord);\n"
+    "    vec4 color2 = texture2D(tex2, vTexCoord);\n"
+    "    vec4 color3 = texture2D(tex3, vTexCoord);\n"
+    "    vec4 color4 = texture2D(tex4, vTexCoord);\n"
+    "    vec4 color5 = texture2D(tex5, vTexCoord);\n"
+    "    vec4 color6 = texture2D(tex6, vTexCoord);\n"
+    "    vec4 color7 = texture2D(tex7, vTexCoord);\n"
+    "    vec4 color8 = texture2D(tex8, vTexCoord);\n"
+    "    gl_FragColor = (color1 * blendFactor) + (color2 * (1.0 - blendFactor)) + color3 + color4 "
+    "+ color5+color6 + color7 + color8;\n"
+    "}";
 
-static string invert_fragment = "#version 100\n"
-"precision mediump float;\n"
-"\n"
-"uniform sampler2D tex;\n"
-"varying vec2 vTexCoord;\n"
-"\n"
-"void main() {\n"
-"    const vec3 kInvert = vec3(1, 1, 1);\n"
-"    gl_FragColor = vec4(texture2D(tex, vTexCoord).rgb, 1);\n"
-"}";
+static string invert_fragment =
+    "#version 100\n"
+    "precision mediump float;\n"
+    "\n"
+    "uniform sampler2D tex;\n"
+    "varying vec2 vTexCoord;\n"
+    "\n"
+    "void main() {\n"
+    "    const vec3 kInvert = vec3(1, 1, 1);\n"
+    "    gl_FragColor = vec4(texture2D(tex, vTexCoord).rgb, 1);\n"
+    "}";
 
-static string passthrough_fragment = "#version 100\n"
-"precision mediump float;\n"
-"\n"
-"uniform sampler2D tex;\n"
-"varying vec2 vTexCoord;\n"
-"\n"
-"void main() {\n"
-"    gl_FragColor = texture2D(tex, vTexCoord);\n"
-"}";
+static string passthrough_fragment =
+    "#version 100\n"
+    "precision mediump float;\n"
+    "\n"
+    "uniform sampler2D tex;\n"
+    "varying vec2 vTexCoord;\n"
+    "\n"
+    "void main() {\n"
+    "    gl_FragColor = texture2D(tex, vTexCoord);\n"
+    "}";
 
-static string passthrough_vertex = "#version 100\n"
-"\n"
-"attribute vec2 position;\n"
-"attribute vec2 texCoord;\n"
-"varying vec2 vTexCoord;\n"
-"void main(void) {\n"
-"    gl_Position = vec4(position, 0, 1);\n"
-"    vTexCoord = texCoord;\n"
-"}";
+static string passthrough_vertex =
+    "#version 100\n"
+    "\n"
+    "attribute vec2 position;\n"
+    "attribute vec2 texCoord;\n"
+    "varying vec2 vTexCoord;\n"
+    "void main(void) {\n"
+    "    gl_Position = vec4(position, 0, 1);\n"
+    "    vTexCoord = texCoord;\n"
+    "}";
 
 #endif
 
@@ -119,7 +136,7 @@ static GLuint build_shader(const GLchar *shader_source, GLenum shader_type) {
   return 0;
 }
 
-#if FRONTEND==1
+#if FRONTEND == 1
 
 static string get_shader_text(string shader_name, GLenum shader_type) {
   if (shader_type == GL_VERTEX_SHADER) {

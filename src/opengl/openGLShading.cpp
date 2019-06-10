@@ -5,8 +5,7 @@
 
 #if FRONTEND == 1
 #include <emscripten.h>
-extern "C"
-{
+extern "C" {
 #include "html5.h"
 }
 #include <EGL/egl.h>
@@ -45,17 +44,18 @@ extern "C"
 #include "SkTypeface.h"
 #include "gl/GrGLInterface.h"
 
+#include <vector>
+
 using namespace WREOpenGL;
 
 static ProgramPool program_pool;
 static TexturePool texture_pool;
 
-static SkCanvas *canvas;
 static sk_sp<GrContext> skiaContext;
-static sk_sp<SkSurface> surface;
+static std::vector<sk_sp<SkSurface>> surfaces;
+static std::vector<uint32_t> surface_textures;
 
-typedef struct
-{
+typedef struct {
   GLuint position_buffer;
   GLuint texture_buffer;
   GLuint vertex_array;
@@ -67,38 +67,36 @@ ProgramInfo passthrough_program;
 #if FRONTEND == 0
 GLFWwindow *window;
 #endif
-GLuint backend_texture;
 GLuint vertex_array;
 static sk_sp<SkTypeface> typeface;
 
+static int text_index = 0;
+
 #if FRONTEND == 1
 
-static const float position[12] = {-1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f,
-                                   -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f};
+static const float position[12] = {-1.0f, 1.0f,  1.0f, 1.0f, -1.0f, -1.0f,
+                                   -1.0f, -1.0f, 1.0f, 1.0f, 1.0f,  -1.0f};
 
 #else
 
 static const float position[12] = {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f,
-                                   -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f};
+                                   -1.0f, 1.0f,  1.0f, -1.0f, 1.0f,  1.0f};
 
 #endif
 
 static const float textureCoords[12] = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
                                         0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
 
-uint32_t get_texture()
-{
+uint32_t get_texture() {
   return texture_pool.get_texture();
 }
 
-void release_texture(uint32_t textureID)
-{
+void release_texture(uint32_t textureID) {
   texture_pool.release_texture(textureID);
   texture_pool.flush();
 }
 
-static GLuint generate_vertex_array()
-{
+static GLuint generate_vertex_array() {
   GLuint vao;
   GLCheckDbg("reality check.");
   glGenVertexArrays(1, &vao);
@@ -108,8 +106,7 @@ static GLuint generate_vertex_array()
   return vao;
 }
 
-static GLuint position_buffer_setup(GLuint program)
-{
+static GLuint position_buffer_setup(GLuint program) {
   GLuint positionBuf;
   glGenBuffers(1, &positionBuf);
   GLCheckDbg("generating position buffer.");
@@ -126,8 +123,7 @@ static GLuint position_buffer_setup(GLuint program)
   return positionBuf;
 }
 
-static GLuint texture_buffer_setup(GLuint program, string buffer_name)
-{
+static GLuint texture_buffer_setup(GLuint program, string buffer_name) {
   GLuint texturesBuffer;
   glGenBuffers(1, &texturesBuffer);
   GLCheckDbg("generating texture buffer.");
@@ -144,13 +140,11 @@ static GLuint texture_buffer_setup(GLuint program, string buffer_name)
   return texturesBuffer;
 }
 
-GLuint get_invert_program()
-{
+GLuint get_invert_program() {
   return program_pool.get_program("passthrough", "invert");
 }
 
-ProgramInfo build_invert_program()
-{
+ProgramInfo build_invert_program() {
   GLuint program = get_invert_program();
   GLCheckDbg("generating program.");
   glUseProgram(program);
@@ -162,13 +156,11 @@ ProgramInfo build_invert_program()
   return (ProgramInfo){position_buffer, texture_buffer, vertex_array};
 }
 
-GLuint get_passthrough_program()
-{
+GLuint get_passthrough_program() {
   return program_pool.get_program("passthrough", "passthrough");
 }
 
-ProgramInfo build_passthrough_program()
-{
+ProgramInfo build_passthrough_program() {
   GLuint program = get_passthrough_program();
   GLCheckDbg("generating program.");
   glUseProgram(program);
@@ -180,13 +172,11 @@ ProgramInfo build_passthrough_program()
   return (ProgramInfo){position_buffer, texture_buffer, vertex_array};
 }
 
-GLuint get_blend_program()
-{
+GLuint get_blend_program() {
   return program_pool.get_program("passthrough", "blend");
 }
 
-ProgramInfo build_blend_program()
-{
+ProgramInfo build_blend_program() {
   GLuint program = get_blend_program();
   GLCheckDbg("generating program.");
   glUseProgram(program);
@@ -200,8 +190,7 @@ ProgramInfo build_blend_program()
   return (ProgramInfo){position_buffer, texture_buffer, vertex_array};
 }
 
-void setupOpenGL(int width, int height, char *canvasName)
-{
+void setupOpenGL(int width, int height, char *canvasName) {
 #if FRONTEND == 1
   EmscriptenWebGLContextAttributes attrs;
   attrs.explicitSwapControl = 0;
@@ -217,8 +206,7 @@ void setupOpenGL(int width, int height, char *canvasName)
 
 #else
 
-  if (!glfwInit())
-  {
+  if (!glfwInit()) {
     log_error("init failed");
     exit(1);
   }
@@ -230,8 +218,7 @@ void setupOpenGL(int width, int height, char *canvasName)
   glfwWindowHint(GLFW_VISIBLE, 0);
   log_info("creating window");
   window = glfwCreateWindow(width, height, "", NULL, NULL);
-  if (window == NULL)
-  {
+  if (window == NULL) {
     log_error("no window");
     exit(1);
   }
@@ -257,34 +244,31 @@ void setupOpenGL(int width, int height, char *canvasName)
   passthrough_program = build_passthrough_program();
 
   skiaContext = GrContext::MakeGL();
-  backend_texture = get_texture();
-  glBindTexture(GL_TEXTURE_2D, backend_texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-  GrGLTextureInfo texture_info = {
-      .fID = backend_texture, .fTarget = GL_TEXTURE_2D, .fFormat = GR_GL_RGBA8};
-  GrBackendTexture texture(width, height, GrMipMapped::kNo, texture_info);
+  for (int i = 0; i < 7; i++) {
+    auto backend_texture = get_texture();
+    glBindTexture(GL_TEXTURE_2D, backend_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    GrGLTextureInfo texture_info = {
+        .fID = backend_texture, .fTarget = GL_TEXTURE_2D, .fFormat = GR_GL_RGBA8};
+    GrBackendTexture texture(width, height, GrMipMapped::kNo, texture_info);
 
-  surface =
-      sk_sp(SkSurface::MakeFromBackendTexture(skiaContext.get(), texture, kTopLeft_GrSurfaceOrigin,
-                                              0, kRGBA_8888_SkColorType, nullptr, nullptr));
+    auto surface = sk_sp(
+        SkSurface::MakeFromBackendTexture(skiaContext.get(), texture, kTopLeft_GrSurfaceOrigin, 0,
+                                          kRGBA_8888_SkColorType, nullptr, nullptr));
 
-  if (!surface)
-  {
-    log_error("SkSurface::MakeRenderTarget returned null");
-    exit(1);
-  }
-  canvas = surface->getCanvas();
-  if (canvas == nullptr)
-  {
-    log_error("no canvas");
-    exit(1);
+    if (!surface) {
+      log_error("SkSurface::MakeRenderTarget returned null");
+      exit(1);
+    }
+
+    surfaces.push_back(surface);
+    surface_textures.push_back(backend_texture);
   }
 
   typeface = SkTypeface::MakeFromFile("./fonts/pacifico/Pacifico.ttf");
 }
 
-GLuint loadTexture(int width, int height, const uint8_t *buffer)
-{
+GLuint loadTexture(int width, int height, const uint8_t *buffer) {
   GLuint textureID = get_texture();
   GLCheckDbg("get texture");
   glActiveTexture(GL_TEXTURE0 + textureID);
@@ -297,8 +281,7 @@ GLuint loadTexture(int width, int height, const uint8_t *buffer)
   return textureID;
 }
 
-void invertFrame(uint32_t textureID)
-{
+void invertFrame(uint32_t textureID) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -319,8 +302,7 @@ void invertFrame(uint32_t textureID)
   GLCheckDbg("Invert.");
 }
 
-void passthroughFrame(uint32_t textureID)
-{
+void passthroughFrame(uint32_t textureID) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -341,8 +323,10 @@ void passthroughFrame(uint32_t textureID)
   GLCheckDbg("Invert.");
 }
 
-void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio)
-{
+void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio, uint32_t texture3ID,
+                 uint32_t texture4ID, uint32_t texture5ID, uint32_t texture6ID, uint32_t texture7ID,
+                 uint32_t texture8ID) {
+  text_index = 0;
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -370,56 +354,62 @@ void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio)
   glUniform1i(glGetUniformLocation(program, "tex2"), texture2ID);
   GLCheckDbg("set texture 2");
 
+  glActiveTexture(GL_TEXTURE0 + texture3ID);
+  glBindTexture(GL_TEXTURE_2D, texture3ID);
+  glUniform1i(glGetUniformLocation(program, "tex3"), texture3ID);
+
+  glActiveTexture(GL_TEXTURE0 + texture4ID);
+  glBindTexture(GL_TEXTURE_2D, texture4ID);
+  glUniform1i(glGetUniformLocation(program, "tex4"), texture4ID);
+
+  glActiveTexture(GL_TEXTURE0 + texture5ID);
+  glBindTexture(GL_TEXTURE_2D, texture5ID);
+  glUniform1i(glGetUniformLocation(program, "tex5"), texture5ID);
+
+  glActiveTexture(GL_TEXTURE0 + texture6ID);
+  glBindTexture(GL_TEXTURE_2D, texture6ID);
+  glUniform1i(glGetUniformLocation(program, "tex6"), texture6ID);
+
+  glActiveTexture(GL_TEXTURE0 + texture7ID);
+  glBindTexture(GL_TEXTURE_2D, texture7ID);
+  glUniform1i(glGetUniformLocation(program, "tex7"), texture7ID);
+
+  glActiveTexture(GL_TEXTURE0 + texture8ID);
+  glBindTexture(GL_TEXTURE_2D, texture8ID);
+  glUniform1i(glGetUniformLocation(program, "tex8"), texture8ID);
+
   glDrawArrays(GL_TRIANGLES, 0, 6);
   GLCheckDbg("Draw.");
 }
 
-void getCurrentResults(int width, int height, uint8_t *outputBuffer)
-{
+void getCurrentResults(int width, int height, uint8_t *outputBuffer) {
   glReadPixels(0, 0, width, height, PIXEL_FORMAT, GL_UNSIGNED_BYTE, outputBuffer);
 }
 
-uint32_t render_text(string text)
-{
+uint32_t render_text(string text, int x, int y) {
   GLCheckDbg("Entering skia");
   glBindVertexArray(0);
   skiaContext->resetContext();
+  auto canvas = surfaces[text_index]->getCanvas();
+  auto backing_texture = surface_textures[text_index];
+  text_index++;
   canvas->clear(SkColorSetARGB(255, 0, 0, 0));
   auto text_color = SkColor4f::FromColor(SkColorSetARGB(255, 0, 0, 255));
   SkPaint paint2(text_color);
-  if (typeface == nullptr)
-  {
+  if (typeface == nullptr) {
     log_error("no typeface");
     exit(1);
   }
-  // SkString type_name;
-  // typeface->getFamilyName(&type_name);
-  // log_debug("getting family name");
-  // auto ID = typeface->uniqueID();
-  // log_debug("getting unique ID");
-  // log_info("type name: %s, ID: %d", type_name.c_str(), ID);
-  auto text_blob = SkTextBlob::MakeFromString(text.c_str(), SkFont(typeface, 220));
-  canvas->drawTextBlob(text_blob.get(), 100, 250, paint2);
+
+  auto text_blob = SkTextBlob::MakeFromString(text.c_str(), SkFont(typeface, 50));
+  canvas->drawTextBlob(text_blob.get(), x, y, paint2);
   canvas->flush();
   GLCheckDbg("Skia");
 
-  // auto texture = surface->getBackendTexture(SkSurface::kFlushRead_BackendHandleAccess);
-  // GrGLTextureInfo texture_info;
-  // if (!texture.isValid()) {
-  //   log_error("missing texture");
-  //   exit(1);
-  // }
-  // if (!texture.getGLTextureInfo(&texture_info)) {
-  //   log_error("missing texture info");
-  //   exit(1);
-  // }
-  // return texture_info.fID;
-
-  return backend_texture;
+  return backing_texture;
 }
 
-void tearDownOpenGL()
-{
+void tearDownOpenGL() {
   glDeleteBuffers(1, &invert_program.position_buffer);
   glDeleteBuffers(1, &invert_program.texture_buffer);
   glDeleteBuffers(1, &blend_program.position_buffer);

@@ -6,11 +6,13 @@ void invertFrame(uint32_t textureID);
 
 void passthroughFrame(uint32_t textureID);
 
-void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio);
+void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio, uint32_t texture3ID,
+                 uint32_t texture4ID, uint32_t texture5ID, uint32_t texture6ID, uint32_t texture7ID,
+                 uint32_t texture8ID);
 
 void tearDownOpenGL();
 
-uint32_t render_text(string text);
+uint32_t render_text(string text, int x, int y);
 
 #if FRONTEND == 0
 uint32_t get_texture();
