@@ -36,45 +36,94 @@ export function renderFrame(textureId1, textureId2) {
   var skiaTexture1 = Module.ccall(
     "renderTextRun",
     "number",
-    ["number", "number", "number"],
-    [idBuffer, 0, 0]
+    [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number"
+    ],
+    [idBuffer, 0, 0, 50, 57, 57, 57, 255]
   );
   var skiaTexture1 = Module.ccall(
     "renderTextRun",
     "number",
-    ["number", "number", "number"],
-    [idBuffer, 70, 70]
+    [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number"
+    ],
+    [idBuffer, 70, 70, 20, 0, 0, 250, 255]
   );
   var skiaTexture2 = Module.ccall(
     "renderTextRun",
     "number",
-    ["number", "number", "number"],
-    [idBuffer, 130, 130]
+    [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number"
+    ],
+    [idBuffer, 130, 130, 70, 0, 0, 0, 255]
   );
   var skiaTexture3 = Module.ccall(
     "renderTextRun",
     "number",
-    ["number", "number", "number"],
-    [idBuffer, 250, 250]
+    [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number"
+    ],
+    [idBuffer, 250, 250, 10, 100, 0, 100, 255]
   );
   var skiaTexture4 = Module.ccall(
     "renderTextRun",
     "number",
-    ["number", "number", "number"],
-    [idBuffer, 350, 370]
+    [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number"
+    ],
+    [idBuffer, 350, 370, 100, 255, 128, 0, 255]
   );
   var skiaTexture5 = Module.ccall(
     "renderTextRun",
     "number",
-    ["number", "number", "number"],
-    [idBuffer, 500, 500]
+    [
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number",
+      "number"
+    ],
+    [idBuffer, 500, 500, 60, 255, 0, 0, 255]
   );
-  var skiaTexture6 = Module.ccall(
-    "renderTextRun",
-    "number",
-    ["number", "number", "number"],
-    [idBuffer, 0, 0]
-  );
+
   // Module.ccall("invertFrameRun", null, ["number"], [skiaTexture]);
   Module.ccall(
     "blendTexturesRun",
@@ -91,15 +140,13 @@ export function renderFrame(textureId1, textureId2) {
       "number"
     ],
     [
+      6,
       textureId1,
-      textureId2,
-      0.5,
       skiaTexture1,
       skiaTexture2,
       skiaTexture3,
       skiaTexture4,
-      skiaTexture5,
-      skiaTexture6
+      skiaTexture5
     ]
   );
 }

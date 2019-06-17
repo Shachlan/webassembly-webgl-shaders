@@ -44,16 +44,16 @@ void passthroughFrameRun(uint32_t texture1) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-void blendTexturesRun(uint32_t texture1, uint32_t texture2, float blend_ratio, uint32_t texture3ID,
-                      uint32_t texture4ID, uint32_t texture5ID, uint32_t texture6ID,
-                      uint32_t texture7ID, uint32_t texture8ID) {
-  blendFrames(texture1, texture2, blend_ratio, texture3ID, texture4ID, texture5ID, texture6ID,
-              texture7ID, texture8ID);
+void blendTexturesRun(int number_of_textures, uint32_t texture1, uint32_t texture2,
+                      uint32_t texture3ID, uint32_t texture4ID, uint32_t texture5ID,
+                      uint32_t texture6ID, uint32_t texture7ID, uint32_t texture8ID) {
+  blendFrames(number_of_textures, texture1, texture2, texture3ID, texture4ID, texture5ID,
+              texture6ID, texture7ID, texture8ID);
 }
 
 EMSCRIPTEN_KEEPALIVE
-uint32_t renderTextRun(char *text, int x, int y) {
+uint32_t renderTextRun(char *text, int x, int y, int font_size, int r, int g, int b, int a) {
   std::string str(text);
-  return render_text(str, x, y);
+  return render_text(str, x, y, font_size, r, g, b, a);
 }
 }

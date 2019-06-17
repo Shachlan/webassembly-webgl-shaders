@@ -323,7 +323,7 @@ void passthroughFrame(uint32_t textureID) {
   GLCheckDbg("Invert.");
 }
 
-void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio, uint32_t texture3ID,
+void blendFrames(int number_of_textures, uint32_t texture1, uint32_t texture2, uint32_t texture3ID,
                  uint32_t texture4ID, uint32_t texture5ID, uint32_t texture6ID, uint32_t texture7ID,
                  uint32_t texture8ID) {
   text_index = 0;
@@ -337,21 +337,21 @@ void blendFrames(uint32_t texture1ID, uint32_t texture2ID, float blend_ratio, ui
   GLCheckDbg("use blend program");
   glBindVertexArray(blend_program.vertex_array);
   GLCheckDbg("bind vertex array");
-  glUniform1f(glGetUniformLocation(program, "blendFactor"), blend_ratio);
-  GLCheckDbg("set blend factor");
+  glUniform1i(glGetUniformLocation(program, "number_of_textures"), number_of_textures);
+  GLCheckDbg("set number_of_textures");
 
-  glActiveTexture(GL_TEXTURE0 + texture1ID);
+  glActiveTexture(GL_TEXTURE0 + texture1);
   GLCheckDbg("active texture 1");
-  glBindTexture(GL_TEXTURE_2D, texture1ID);
+  glBindTexture(GL_TEXTURE_2D, texture1);
   GLCheckDbg("bind texture 1.");
-  glUniform1i(glGetUniformLocation(program, "tex1"), texture1ID);
+  glUniform1i(glGetUniformLocation(program, "tex1"), texture1);
 
   GLCheckDbg("set texture 1");
-  glActiveTexture(GL_TEXTURE0 + texture2ID);
+  glActiveTexture(GL_TEXTURE0 + texture2);
   GLCheckDbg("active texture 2");
-  glBindTexture(GL_TEXTURE_2D, texture2ID);
+  glBindTexture(GL_TEXTURE_2D, texture2);
   GLCheckDbg("bind texture 2.");
-  glUniform1i(glGetUniformLocation(program, "tex2"), texture2ID);
+  glUniform1i(glGetUniformLocation(program, "tex2"), texture2);
   GLCheckDbg("set texture 2");
 
   glActiveTexture(GL_TEXTURE0 + texture3ID);
@@ -386,7 +386,7 @@ void getCurrentResults(int width, int height, uint8_t *outputBuffer) {
   glReadPixels(0, 0, width, height, PIXEL_FORMAT, GL_UNSIGNED_BYTE, outputBuffer);
 }
 
-uint32_t render_text(string text, int x, int y) {
+uint32_t render_text(string text, int x, int y, int font_size, int r, int g, int b, int a) {
   GLCheckDbg("Entering skia");
   glBindVertexArray(0);
   skiaContext->resetContext();
@@ -394,14 +394,14 @@ uint32_t render_text(string text, int x, int y) {
   auto backing_texture = surface_textures[text_index];
   text_index++;
   canvas->clear(SkColorSetARGB(255, 0, 0, 0));
-  auto text_color = SkColor4f::FromColor(SkColorSetARGB(255, 0, 0, 255));
+  auto text_color = SkColor4f::FromColor(SkColorSetARGB(a, r, g, b));
   SkPaint paint2(text_color);
   if (typeface == nullptr) {
     log_error("no typeface");
     exit(1);
   }
 
-  auto text_blob = SkTextBlob::MakeFromString(text.c_str(), SkFont(typeface, 50));
+  auto text_blob = SkTextBlob::MakeFromString(text.c_str(), SkFont(typeface, font_size));
   canvas->drawTextBlob(text_blob.get(), x, y, paint2);
   canvas->flush();
   GLCheckDbg("Skia");
