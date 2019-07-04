@@ -9,7 +9,7 @@
 
 #include "OpenGLHeaders.hpp"
 
-#if FRONTEND == 1
+#if defined(WRE_FRONTEND) && WRE_FRONTEND
 
 static string blend_fragment =
     "#version 100\n"
@@ -135,7 +135,7 @@ static GLuint build_shader(const GLchar *shader_source, GLenum shader_type) {
   return 0;
 }
 
-#if FRONTEND == 1
+#if defined(WRE_FRONTEND) && WRE_FRONTEND
 
 static string get_shader_text(string shader_name, GLenum shader_type) {
   if (shader_type == GL_VERTEX_SHADER) {

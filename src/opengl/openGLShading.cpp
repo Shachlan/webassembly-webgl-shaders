@@ -3,7 +3,7 @@
 #include <fstream>
 #include <string>
 
-#if FRONTEND == 1
+#if defined(WRE_FRONTEND) && WRE_FRONTEND
 #include <emscripten.h>
 extern "C" {
 #include "html5.h"
@@ -30,7 +30,7 @@ extern "C" {
 #include "ProgramPool.hpp"
 #include "TexturePool.hpp"
 
-#include <src/gpu/gl/GrGlDefines.h>
+#include <src/gpu/gl/GrGLDefines.h>
 #include <sstream>
 #include "GrContext.h"
 #include "SkData.h"
@@ -64,7 +64,7 @@ typedef struct {
 ProgramInfo invert_program;
 ProgramInfo blend_program;
 ProgramInfo passthrough_program;
-#if FRONTEND == 0
+#if defined(WRE_FRONTEND) && !WRE_FRONTEND
 GLFWwindow *window;
 #endif
 GLuint vertex_array;
@@ -72,7 +72,7 @@ static sk_sp<SkTypeface> typeface;
 
 static int text_index = 0;
 
-#if FRONTEND == 1
+#if defined(WRE_FRONTEND) && WRE_FRONTEND
 
 static const float position[12] = {-1.0f, 1.0f,  1.0f, 1.0f, -1.0f, -1.0f,
                                    -1.0f, -1.0f, 1.0f, 1.0f, 1.0f,  -1.0f};
@@ -191,7 +191,7 @@ ProgramInfo build_blend_program() {
 }
 
 void setupOpenGL(int width, int height, char *canvasName) {
-#if FRONTEND == 1
+#if defined(WRE_FRONTEND) && WRE_FRONTEND
   EmscriptenWebGLContextAttributes attrs;
   attrs.explicitSwapControl = 0;
   attrs.depth = 1;
@@ -416,7 +416,7 @@ void tearDownOpenGL() {
   glDeleteBuffers(1, &blend_program.texture_buffer);
   log_debug("releasing programs");
   program_pool.clear();
-#if FRONTEND == 0
+#if defined(WRE_FRONTEND) && !WRE_FRONTEND
   log_debug("releasing textures");
   texture_pool.clear();
   glfwDestroyWindow(window);

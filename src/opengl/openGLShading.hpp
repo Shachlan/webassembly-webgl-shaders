@@ -14,7 +14,7 @@ void tearDownOpenGL();
 
 uint32_t render_text(string text, int x, int y, int font_size, int r, int g, int b, int a);
 
-#if FRONTEND == 0
+#if defined(WRE_FRONTEND) && !WRE_FRONTEND
 uint32_t get_texture();
 void release_texture(uint32_t textureID);
 void getCurrentResults(int width, int height, uint8_t *outputBuffer);

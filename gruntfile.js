@@ -28,7 +28,6 @@ module.exports = grunt => {
         -I./src -I./third_party/skia/include/core \
         -I./third_party/skia/include/gpu \
         -I./third_party/skia/ \
-        -DFRONTEND=1 \
         -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
         -s USE_LIBPNG=1 \
         -s USE_FREETYPE=1 \
