@@ -26,7 +26,7 @@ module.exports = grunt => {
         -I./third_party/skia/include/gpu \
         -I./third_party/skia/ \
         -DFRONTEND=1 \
-        ./third_party/skia/out/debugger_wasm/*.a \
+        ./third_party/skia/out/Build-wasm-Release/Release/*.a \
         -g4 \
         -O3 \
         -s LEGACY_GL_EMULATION=0 \
