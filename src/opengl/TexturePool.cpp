@@ -7,12 +7,11 @@
 
 using namespace WREOpenGL;
 
-GLuint create_texture()
-{
+GLuint create_texture() {
   GLuint textureLoc;
   glGenTextures(1, &textureLoc);
   GLCheckDbg("Failed to generate texture.");
-  glActiveTexture(GL_TEXTURE0 + textureLoc);
+  glActiveTexture(GL_TEXTURE0);
 
   glBindTexture(GL_TEXTURE_2D, textureLoc);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -25,31 +24,25 @@ GLuint create_texture()
   return textureLoc;
 }
 
-GLuint TexturePool::get_texture()
-{
+GLuint TexturePool::get_texture() {
   return create_texture();
 }
 
-void TexturePool::release_texture(GLuint name)
-{
+void TexturePool::release_texture(GLuint name) {
   this->used_textures.erase(name);
   this->available_textures.insert(name);
 }
 
-void TexturePool::flush()
-{
-  for (auto &name : this->available_textures)
-  {
+void TexturePool::flush() {
+  for (auto &name : this->available_textures) {
     glDeleteTextures(1, &name);
   }
 }
 
-void TexturePool::clear()
-{
+void TexturePool::clear() {
   this->flush();
 
-  for (auto &name : this->used_textures)
-  {
+  for (auto &name : this->used_textures) {
     glDeleteTextures(1, &name);
   }
 }

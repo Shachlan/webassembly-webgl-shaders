@@ -340,43 +340,43 @@ void blendFrames(int number_of_textures, uint32_t texture1, uint32_t texture2, u
   glUniform1i(glGetUniformLocation(program, "number_of_textures"), number_of_textures);
   GLCheckDbg("set number_of_textures");
 
-  glActiveTexture(GL_TEXTURE0 + texture1);
+  glActiveTexture(GL_TEXTURE0);
   GLCheckDbg("active texture 1");
   glBindTexture(GL_TEXTURE_2D, texture1);
   GLCheckDbg("bind texture 1.");
-  glUniform1i(glGetUniformLocation(program, "tex1"), texture1);
+  glUniform1i(glGetUniformLocation(program, "tex1"), 0);
 
   GLCheckDbg("set texture 1");
-  glActiveTexture(GL_TEXTURE0 + texture2);
+  glActiveTexture(GL_TEXTURE0 + 1);
   GLCheckDbg("active texture 2");
   glBindTexture(GL_TEXTURE_2D, texture2);
   GLCheckDbg("bind texture 2.");
-  glUniform1i(glGetUniformLocation(program, "tex2"), texture2);
+  glUniform1i(glGetUniformLocation(program, "tex2"), 1);
   GLCheckDbg("set texture 2");
 
-  glActiveTexture(GL_TEXTURE0 + texture3ID);
+  glActiveTexture(GL_TEXTURE0 + 2);
   glBindTexture(GL_TEXTURE_2D, texture3ID);
-  glUniform1i(glGetUniformLocation(program, "tex3"), texture3ID);
+  glUniform1i(glGetUniformLocation(program, "tex3"), 2);
 
-  glActiveTexture(GL_TEXTURE0 + texture4ID);
+  glActiveTexture(GL_TEXTURE0 + 3);
   glBindTexture(GL_TEXTURE_2D, texture4ID);
-  glUniform1i(glGetUniformLocation(program, "tex4"), texture4ID);
+  glUniform1i(glGetUniformLocation(program, "tex4"), 3);
 
-  glActiveTexture(GL_TEXTURE0 + texture5ID);
+  glActiveTexture(GL_TEXTURE0 + 4);
   glBindTexture(GL_TEXTURE_2D, texture5ID);
-  glUniform1i(glGetUniformLocation(program, "tex5"), texture5ID);
+  glUniform1i(glGetUniformLocation(program, "tex5"), 4);
 
-  glActiveTexture(GL_TEXTURE0 + texture6ID);
+  glActiveTexture(GL_TEXTURE0 + 5);
   glBindTexture(GL_TEXTURE_2D, texture6ID);
-  glUniform1i(glGetUniformLocation(program, "tex6"), texture6ID);
+  glUniform1i(glGetUniformLocation(program, "tex6"), 5);
 
-  glActiveTexture(GL_TEXTURE0 + texture7ID);
+  glActiveTexture(GL_TEXTURE0 + 6);
   glBindTexture(GL_TEXTURE_2D, texture7ID);
-  glUniform1i(glGetUniformLocation(program, "tex7"), texture7ID);
+  glUniform1i(glGetUniformLocation(program, "tex7"), 6);
 
-  glActiveTexture(GL_TEXTURE0 + texture8ID);
+  glActiveTexture(GL_TEXTURE0 + 7);
   glBindTexture(GL_TEXTURE_2D, texture8ID);
-  glUniform1i(glGetUniformLocation(program, "tex8"), texture8ID);
+  glUniform1i(glGetUniformLocation(program, "tex8"), 7);
 
   glDrawArrays(GL_TRIANGLES, 0, 6);
   GLCheckDbg("Draw.");
